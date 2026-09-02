@@ -6,7 +6,8 @@
   "exports": {
     ".": "./index.mjs",
     "./schemas": "./schemas.mjs",
-    "./pagination": "./pagination.mjs"
+    "./pagination": "./pagination.mjs",
+    "./client": "./client.mjs"
   },
   "dependencies": {
     "@nft-marketplace/domain": "workspace:*",
@@ -18,7 +19,7 @@
     "test": "node --test *.test.mjs",
     "lint": "node -e \"console.log('[api-client] placeholder: tooling belongs to T-003')\"",
     "typecheck": "node -e \"console.log('[api-client] placeholder: tooling belongs to T-003 and T-005')\"",
-    "generate": "node -e \"console.log('[api-client] placeholder: REST and GraphQL generation belongs to T-005')\"",
+    "generate": "node ../../tooling/codegen/generate.mjs",
     "docker": "node -e \"console.log('[api-client] placeholder: shared packages are not containerized')\""
   }
 }

@@ -2,13 +2,30 @@
   "name": "@nft-marketplace/ui",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.mjs",
+    "./styles.css": "./styles.css"
+  },
+  "peerDependencies": {
+    "react": ">=18 <20",
+    "react-dom": ">=18 <20"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
   "scripts": {
     "dev": "node -e \"console.log('[ui] placeholder: implementation belongs to T-005')\"",
     "build": "node -e \"console.log('[ui] placeholder: implementation belongs to T-005')\"",
-    "test": "node -e \"console.log('[ui] placeholder: tests belong to T-005 and T-070')\"",
+    "test": "node --test *.test.mjs",
     "lint": "node -e \"console.log('[ui] placeholder: tooling belongs to T-003')\"",
     "typecheck": "node -e \"console.log('[ui] placeholder: tooling belongs to T-003 and T-005')\"",
     "generate": "node -e \"console.log('[ui] placeholder: generation belongs to later UI tasks')\"",
     "docker": "node -e \"console.log('[ui] placeholder: shared packages are not containerized')\""
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1"
   }
 }
