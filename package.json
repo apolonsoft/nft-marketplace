@@ -20,6 +20,7 @@
     "typecheck": "turbo run typecheck",
     "generate": "turbo run generate",
     "docker": "turbo run docker",
+    "affected": "node tooling/scripts/affected.mjs",
     "workspaces:list": "yarn workspaces list"
   },
   "devDependencies": {
