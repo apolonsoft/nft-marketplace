@@ -4,10 +4,22 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./index.mjs",
-    "./schemas": "./schemas.mjs",
-    "./pagination": "./pagination.mjs",
-    "./client": "./client.mjs"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./schemas": {
+      "types": "./dist/schemas.d.ts",
+      "import": "./dist/schemas.js"
+    },
+    "./pagination": {
+      "types": "./dist/pagination.d.ts",
+      "import": "./dist/pagination.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js"
+    }
   },
   "dependencies": {
     "@nft-marketplace/domain": "workspace:*",
@@ -15,11 +27,11 @@
   },
   "scripts": {
     "dev": "node -e \"console.log('[api-client] placeholder: implementation belongs to T-005')\"",
-    "build": "node -e \"console.log('[api-client] placeholder: implementation belongs to T-005')\"",
-    "test": "node --test *.test.mjs",
+    "build": "../../node_modules/.bin/tsc -p tsconfig.build.json",
+    "test": "../../node_modules/.bin/vitest run --config vitest.config.ts",
     "lint": "node -e \"console.log('[api-client] placeholder: tooling belongs to T-003')\"",
-    "typecheck": "node -e \"console.log('[api-client] placeholder: tooling belongs to T-003 and T-005')\"",
-    "generate": "node ../../tooling/codegen/generate.mjs",
+    "typecheck": "../../node_modules/.bin/tsc -p tsconfig.json --noEmit",
+    "generate": "node --experimental-strip-types ../../tooling/codegen/src/generate.ts",
     "docker": "node -e \"console.log('[api-client] placeholder: shared packages are not containerized')\""
   }
 }

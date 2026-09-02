@@ -4,7 +4,10 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./index.mjs",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
     "./styles.css": "./styles.css"
   },
   "peerDependencies": {
@@ -17,10 +20,10 @@
   },
   "scripts": {
     "dev": "node -e \"console.log('[ui] placeholder: implementation belongs to T-005')\"",
-    "build": "node -e \"console.log('[ui] placeholder: implementation belongs to T-005')\"",
-    "test": "node --test *.test.mjs",
+    "build": "../../node_modules/.bin/tsc -p tsconfig.build.json",
+    "test": "../../node_modules/.bin/vitest run --config vitest.config.ts",
     "lint": "node -e \"console.log('[ui] placeholder: tooling belongs to T-003')\"",
-    "typecheck": "node -e \"console.log('[ui] placeholder: tooling belongs to T-003 and T-005')\"",
+    "typecheck": "../../node_modules/.bin/tsc -p tsconfig.build.json --noEmit",
     "generate": "node -e \"console.log('[ui] placeholder: generation belongs to later UI tasks')\"",
     "docker": "node -e \"console.log('[ui] placeholder: shared packages are not containerized')\""
   },
