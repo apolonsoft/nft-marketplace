@@ -1,1 +1,1 @@
-{"extends":"../config/tsconfig.browser.json","include":["**/*.ts","**/*.tsx"]}
+{"extends":"../config/tsconfig.node.json","include":["src/**/*.ts"]}

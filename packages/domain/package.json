@@ -8,16 +8,25 @@
     "zod": "^3.25.76"
   },
   "exports": {
-    ".": "./index.mjs",
-    "./schemas": "./schemas.mjs",
-    "./models": "./models.mjs"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./schemas": {
+      "types": "./dist/schemas.d.ts",
+      "import": "./dist/schemas.js"
+    },
+    "./models": {
+      "types": "./dist/models.d.ts",
+      "import": "./dist/models.js"
+    }
   },
   "scripts": {
     "dev": "node -e \"console.log('[domain] placeholder: implementation belongs to T-004')\"",
-    "build": "node -e \"console.log('[domain] placeholder: implementation belongs to T-004')\"",
-    "test": "node --test *.test.mjs",
+    "build": "../../node_modules/.bin/tsc -p tsconfig.build.json",
+    "test": "../../node_modules/.bin/vitest run --config vitest.config.ts",
     "lint": "node -e \"console.log('[domain] placeholder: tooling belongs to T-003')\"",
-    "typecheck": "node -e \"console.log('[domain] placeholder: tooling belongs to T-003 and T-004')\"",
+    "typecheck": "../../node_modules/.bin/tsc -p tsconfig.json --noEmit",
     "generate": "node -e \"console.log('[domain] placeholder: generation belongs to later domain tasks')\"",
     "docker": "node -e \"console.log('[domain] placeholder: shared packages are not containerized')\""
   }
