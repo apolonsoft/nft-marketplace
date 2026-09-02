@@ -3,13 +3,39 @@
   "tasks": {
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "dependsOn": ["^dev"]
     },
-    "build": {},
-    "test": {},
+    "build": {
+      "dependsOn": ["^generate", "^build"],
+      "outputs": [
+        "dist/**",
+        "build/**",
+        ".next/**",
+        "!.next/cache/**",
+        "out/**",
+        "generated/**",
+        "src/generated/**",
+        "artifacts/**"
+      ]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
     "lint": {},
-    "typecheck": {},
-    "generate": {},
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
+    "generate": {
+      "dependsOn": ["^generate"],
+      "outputs": [
+        "generated/**",
+        "src/generated/**",
+        "artifacts/**",
+        "public/generated/**"
+      ]
+    },
     "docker": {
       "cache": false
     }
