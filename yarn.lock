@@ -8,6 +8,9 @@ __metadata:
 "@nft-marketplace/api-client@workspace:packages/api-client":
   version: 0.0.0-use.local
   resolution: "@nft-marketplace/api-client@workspace:packages/api-client"
+  dependencies:
+    "@nft-marketplace/domain": "workspace:*"
+    zod: "npm:^3.25.76"
   languageName: unknown
   linkType: soft
 
@@ -17,7 +20,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@nft-marketplace/config@workspace:packages/config":
+"@nft-marketplace/config@workspace:*, @nft-marketplace/config@workspace:packages/config":
   version: 0.0.0-use.local
   resolution: "@nft-marketplace/config@workspace:packages/config"
   languageName: unknown
@@ -35,9 +38,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@nft-marketplace/domain@workspace:packages/domain":
+"@nft-marketplace/domain@workspace:*, @nft-marketplace/domain@workspace:packages/domain":
   version: 0.0.0-use.local
   resolution: "@nft-marketplace/domain@workspace:packages/domain"
+  dependencies:
+    "@nft-marketplace/config": "workspace:*"
+    zod: "npm:^3.25.76"
   languageName: unknown
   linkType: soft
 
@@ -153,5 +159,12 @@ __metadata:
   bin:
     turbo: bin/turbo
   checksum: 10c0/bc912180b8c00f88be0672223c6cf8b61e05f113a93574d3bcb7343f9391ee03c115afc4468c76c4dfcbd9ee4a6564b025762dad9aefe53a91e02ff62613d9be
+  languageName: node
+  linkType: hard
+
+"zod@npm:^3.25.76":
+  version: 3.25.76
+  resolution: "zod@npm:3.25.76"
+  checksum: 10c0/5718ec35e3c40b600316c5b4c5e4976f7fee68151bc8f8d90ec18a469be9571f072e1bbaace10f1e85cf8892ea12d90821b200e980ab46916a6166a4260a983c
   languageName: node
   linkType: hard

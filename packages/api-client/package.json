@@ -2,10 +2,20 @@
   "name": "@nft-marketplace/api-client",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.mjs",
+    "./schemas": "./schemas.mjs",
+    "./pagination": "./pagination.mjs"
+  },
+  "dependencies": {
+    "@nft-marketplace/domain": "workspace:*",
+    "zod": "^3.25.76"
+  },
   "scripts": {
     "dev": "node -e \"console.log('[api-client] placeholder: implementation belongs to T-005')\"",
     "build": "node -e \"console.log('[api-client] placeholder: implementation belongs to T-005')\"",
-    "test": "node -e \"console.log('[api-client] placeholder: tests belong to T-005 and T-070')\"",
+    "test": "node --test *.test.mjs",
     "lint": "node -e \"console.log('[api-client] placeholder: tooling belongs to T-003')\"",
     "typecheck": "node -e \"console.log('[api-client] placeholder: tooling belongs to T-003 and T-005')\"",
     "generate": "node -e \"console.log('[api-client] placeholder: REST and GraphQL generation belongs to T-005')\"",
