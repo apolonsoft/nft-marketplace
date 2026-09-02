@@ -1,0 +1,14 @@
+{
+  "name": "@nft-marketplace/config",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node -e \"console.log('[config] placeholder: implementation belongs to T-003')\"",
+    "build": "node -e \"console.log('[config] placeholder: implementation belongs to T-003')\"",
+    "test": "node -e \"console.log('[config] placeholder: tests belong to T-003 and T-070')\"",
+    "lint": "node -e \"console.log('[config] placeholder: tooling belongs to T-003')\"",
+    "typecheck": "node -e \"console.log('[config] placeholder: tooling belongs to T-003')\"",
+    "generate": "node -e \"console.log('[config] placeholder: generation belongs to T-003')\"",
+    "docker": "node -e \"console.log('[config] placeholder: shared packages are not containerized')\""
+  }
+}

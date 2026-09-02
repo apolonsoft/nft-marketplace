@@ -1,0 +1,14 @@
+{
+  "name": "@nft-marketplace/domain",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node -e \"console.log('[domain] placeholder: implementation belongs to T-004')\"",
+    "build": "node -e \"console.log('[domain] placeholder: implementation belongs to T-004')\"",
+    "test": "node -e \"console.log('[domain] placeholder: tests belong to T-004 and T-070')\"",
+    "lint": "node -e \"console.log('[domain] placeholder: tooling belongs to T-003')\"",
+    "typecheck": "node -e \"console.log('[domain] placeholder: tooling belongs to T-003 and T-004')\"",
+    "generate": "node -e \"console.log('[domain] placeholder: generation belongs to later domain tasks')\"",
+    "docker": "node -e \"console.log('[domain] placeholder: shared packages are not containerized')\""
+  }
+}

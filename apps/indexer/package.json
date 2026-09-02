@@ -1,0 +1,14 @@
+{
+  "name": "@nft-marketplace/indexer",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node -e \"console.log('[indexer] placeholder: implementation belongs to T-020')\"",
+    "build": "node -e \"console.log('[indexer] placeholder: implementation belongs to T-020')\"",
+    "test": "node -e \"console.log('[indexer] placeholder: tests belong to T-020 and T-073')\"",
+    "lint": "node -e \"console.log('[indexer] placeholder: tooling belongs to T-003 and T-020')\"",
+    "typecheck": "node -e \"console.log('[indexer] placeholder: tooling belongs to T-003 and T-020')\"",
+    "generate": "node -e \"console.log('[indexer] placeholder: schema generation belongs to later indexer tasks')\"",
+    "docker": "node -e \"console.log('[indexer] placeholder: containerization belongs to T-060')\""
+  }
+}

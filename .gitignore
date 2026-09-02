@@ -1,0 +1,43 @@
+# Dependencies and package-manager state
+node_modules/
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# Turborepo and framework outputs
+.turbo/
+.next/
+dist/
+build/
+coverage/
+out/
+
+# Foundry outputs
+contracts/marketplace/cache/
+contracts/marketplace/out/
+contracts/marketplace/broadcast/
+
+# Runtime state
+*.log
+*.pid
+.env
+.env.*
+!.env.example
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Local infrastructure data
+infra/data/
+tmp/
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/

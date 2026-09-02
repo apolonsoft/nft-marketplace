@@ -1,0 +1,14 @@
+{
+  "name": "@nft-marketplace/api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node -e \"console.log('[api] placeholder: implementation belongs to T-030')\"",
+    "build": "node -e \"console.log('[api] placeholder: implementation belongs to T-030')\"",
+    "test": "node -e \"console.log('[api] placeholder: tests belong to T-030 and T-070')\"",
+    "lint": "node -e \"console.log('[api] placeholder: tooling belongs to T-003 and T-030')\"",
+    "typecheck": "node -e \"console.log('[api] placeholder: tooling belongs to T-003 and T-030')\"",
+    "generate": "node -e \"console.log('[api] placeholder: OpenAPI and GraphQL generation belongs to later API tasks')\"",
+    "docker": "node -e \"console.log('[api] placeholder: containerization belongs to T-060')\""
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "@nft-marketplace/web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node -e \"console.log('[web] placeholder: implementation belongs to T-050')\"",
+    "build": "node -e \"console.log('[web] placeholder: implementation belongs to T-050')\"",
+    "test": "node -e \"console.log('[web] placeholder: tests belong to T-050 and T-070')\"",
+    "lint": "node -e \"console.log('[web] placeholder: tooling belongs to T-003 and T-050')\"",
+    "typecheck": "node -e \"console.log('[web] placeholder: tooling belongs to T-003 and T-050')\"",
+    "generate": "node -e \"console.log('[web] placeholder: generation belongs to later application tasks')\"",
+    "docker": "node -e \"console.log('[web] placeholder: containerization belongs to T-060')\""
+  }
+}

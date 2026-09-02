@@ -1,0 +1,14 @@
+{
+  "name": "@nft-marketplace/marketplace-contracts",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node -e \"console.log('[marketplace-contracts] placeholder: Foundry scaffolding belongs to T-010')\"",
+    "build": "node -e \"console.log('[marketplace-contracts] placeholder: Foundry scaffolding belongs to T-010')\"",
+    "test": "node -e \"console.log('[marketplace-contracts] placeholder: contract tests belong to T-010 and T-071')\"",
+    "lint": "node -e \"console.log('[marketplace-contracts] placeholder: Solidity tooling belongs to T-010')\"",
+    "typecheck": "node -e \"console.log('[marketplace-contracts] placeholder: no TypeScript sources exist in T-001')\"",
+    "generate": "node -e \"console.log('[marketplace-contracts] placeholder: artifact generation belongs to T-016')\"",
+    "docker": "node -e \"console.log('[marketplace-contracts] placeholder: no contract container is defined in T-001')\""
+  }
+}

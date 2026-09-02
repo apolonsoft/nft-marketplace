@@ -1,0 +1,14 @@
+{
+  "name": "@nft-marketplace/database",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node -e \"console.log('[database] placeholder: implementation belongs to later data tasks')\"",
+    "build": "node -e \"console.log('[database] placeholder: implementation belongs to later data tasks')\"",
+    "test": "node -e \"console.log('[database] placeholder: tests belong to later data tasks and T-070')\"",
+    "lint": "node -e \"console.log('[database] placeholder: tooling belongs to T-003')\"",
+    "typecheck": "node -e \"console.log('[database] placeholder: tooling belongs to T-003')\"",
+    "generate": "node -e \"console.log('[database] placeholder: schema generation belongs to later data tasks')\"",
+    "docker": "node -e \"console.log('[database] placeholder: shared packages are not containerized')\""
+  }
+}

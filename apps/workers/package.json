@@ -1,0 +1,14 @@
+{
+  "name": "@nft-marketplace/workers",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node -e \"console.log('[workers] placeholder: implementation belongs to T-040')\"",
+    "build": "node -e \"console.log('[workers] placeholder: implementation belongs to T-040')\"",
+    "test": "node -e \"console.log('[workers] placeholder: tests belong to T-040 and T-070')\"",
+    "lint": "node -e \"console.log('[workers] placeholder: tooling belongs to T-003 and T-040')\"",
+    "typecheck": "node -e \"console.log('[workers] placeholder: tooling belongs to T-003 and T-040')\"",
+    "generate": "node -e \"console.log('[workers] placeholder: generation belongs to later worker tasks')\"",
+    "docker": "node -e \"console.log('[workers] placeholder: containerization belongs to T-060')\""
+  }
+}
