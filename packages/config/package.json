@@ -2,6 +2,19 @@
   "name": "@nft-marketplace/config",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.mjs",
+    "./env": "./env.mjs",
+    "./errors": "./errors.mjs",
+    "./tsconfig/base": "./tsconfig.base.json",
+    "./tsconfig/node": "./tsconfig.node.json",
+    "./tsconfig/browser": "./tsconfig.browser.json",
+    "./eslint": "./eslint.config.mjs",
+    "./prettier": "./prettier.config.mjs",
+    "./vitest/node": "./vitest.node.config.mjs",
+    "./vitest/browser": "./vitest.browser.config.mjs"
+  },
   "scripts": {
     "dev": "node -e \"console.log('[config] placeholder: implementation belongs to T-003')\"",
     "build": "node -e \"console.log('[config] placeholder: implementation belongs to T-003')\"",

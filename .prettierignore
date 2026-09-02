@@ -1,0 +1,9 @@
+node_modules
+.yarn
+.turbo
+coverage
+dist
+build
+.next
+generated
+artifacts
