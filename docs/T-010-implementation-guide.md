@@ -36,8 +36,10 @@ compilation.
 `foundry.toml` pins Solidity `0.8.24`, disables bytecode/metadata hash variance,
 enables the optimizer with 200 runs, and uses Cancun EVM semantics. The default
 profile is deterministic and local. `anvil` uses chain ID `31337`. `base-sepolia`
-uses chain ID `84532`, `BASE_SEPOLIA_RPC_URL`, and `BASESCAN_API_KEY`; credentials
-must be supplied through the environment and never committed.
+uses chain ID `84532`, the top-level `base_sepolia` RPC endpoint backed by
+`BASE_SEPOLIA_RPC_URL`, and the `base_sepolia` Etherscan mapping backed by
+`BASESCAN_API_KEY`; credentials must be supplied through the environment and
+never committed. Use `--rpc-url base_sepolia` for network commands.
 
 The `ci` profile increases fuzz runs and verbosity. Forge formatting is the
 required lint gate; Solhint may be added later, but is not required for this
