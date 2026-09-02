@@ -2,6 +2,10 @@
   "name": "@nft-marketplace/web",
   "version": "0.0.0",
   "private": true,
+  "dependencies": {
+    "@nft-marketplace/api-client": "workspace:*",
+    "@nft-marketplace/ui": "workspace:*"
+  },
   "scripts": {
     "dev": "node -e \"console.log('[web] placeholder: implementation belongs to T-050')\"",
     "build": "node -e \"console.log('[web] placeholder: implementation belongs to T-050')\"",

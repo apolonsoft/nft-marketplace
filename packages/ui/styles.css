@@ -1,0 +1,13 @@
+:root { --nft-color-bg: #ffffff; --nft-color-fg: #172033; --nft-color-muted: #667085; --nft-color-border: #d9dee8; --nft-color-primary: #315efb; --nft-color-danger: #c43232; --nft-radius: 8px; --nft-space-2: 8px; --nft-space-3: 12px; --nft-space-4: 16px; --nft-focus: 0 0 0 3px rgba(49, 94, 251, .28); }
+.nft-ui { color: var(--nft-color-fg); font: 400 1rem/1.45 system-ui, sans-serif; }
+.nft-button { border: 1px solid var(--nft-color-primary); border-radius: var(--nft-radius); padding: .6rem .9rem; background: var(--nft-color-primary); color: white; cursor: pointer; }
+.nft-button[data-variant="secondary"] { background: transparent; color: var(--nft-color-primary); }
+.nft-button:focus-visible, .nft-input:focus-visible, .nft-select:focus-visible { outline: none; box-shadow: var(--nft-focus); }
+.nft-button:disabled { cursor: not-allowed; opacity: .55; }
+.nft-input, .nft-select { border: 1px solid var(--nft-color-border); border-radius: var(--nft-radius); padding: .6rem .7rem; background: var(--nft-color-bg); color: inherit; }
+.nft-stack { display: flex; flex-direction: column; gap: var(--nft-space-3); }
+.nft-grid { display: grid; gap: var(--nft-space-4); grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+.nft-card { border: 1px solid var(--nft-color-border); border-radius: var(--nft-radius); overflow: hidden; background: var(--nft-color-bg); }
+.nft-card__body { padding: var(--nft-space-4); }
+.nft-muted { color: var(--nft-color-muted); }
+.nft-status[data-tone="danger"] { color: var(--nft-color-danger); }

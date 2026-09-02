@@ -1,3 +1,7 @@
 # Code Generation
 
-Placeholder for contract ABI, OpenAPI, GraphQL, and typed-client generation. Implementation belongs to T-005 and T-016.
+Repository-owned deterministic generation for OpenAPI and GraphQL clients.
+
+Checked-in specifications belong under `tooling/codegen/specs/`; generated
+outputs belong under `packages/api-client/generated/`. The generator is safe to
+run before T-030 publishes real API schemas and must never require manual edits.
