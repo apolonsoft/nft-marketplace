@@ -1,3 +1,6 @@
 # @nft-marketplace/observability
 
-Placeholder for shared logging, tracing, and metrics conventions. T-003 owns initial implementation. It must expose environment-appropriate entry points without leaking server dependencies into browser bundles.
+Shared structured logging conventions. `createLogger` emits JSON records and
+redacts tokens, keys, signatures, cookies, passwords, and other sensitive fields.
+The module is dependency-light at the skeleton stage and exposes a browser-safe
+entrypoint without server-only imports.

@@ -2,6 +2,11 @@
   "name": "@nft-marketplace/observability",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.mjs",
+    "./logger": "./logger.mjs"
+  },
   "scripts": {
     "dev": "node -e \"console.log('[observability] placeholder: implementation belongs to T-003')\"",
     "build": "node -e \"console.log('[observability] placeholder: implementation belongs to T-003')\"",
