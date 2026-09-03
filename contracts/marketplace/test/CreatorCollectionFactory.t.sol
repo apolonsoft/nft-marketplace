@@ -73,4 +73,82 @@ contract CreatorCollectionFactoryTest is Test {
         vm.expectRevert();
         factory.setImplementation(address(0x1234), CollectionStandard.ERC721, true);
     }
+
+    function _deploy721() private returns (CreatorERC721 token) {
+        vm.prank(creator);
+        address collection = factory.deployCollection(
+            CollectionStandard.ERC721,
+            address(implementation721),
+            metadata,
+            royalty,
+            500,
+            bytes32(uint256(100))
+        );
+        return CreatorERC721(collection);
+    }
+
+    function testCreatorCanMintAndUpdateTokenURI() external {
+        CreatorERC721 token = _deploy721();
+        vm.startPrank(creator);
+        token.mint(creator, 1, "ipfs://token-1");
+        assertEq(token.ownerOf(1), creator);
+        assertEq(token.tokenURI(1), "ipfs://token-1");
+        token.setTokenURI(1, "ipfs://token-1-updated");
+        assertEq(token.tokenURI(1), "ipfs://token-1-updated");
+        vm.stopPrank();
+    }
+
+    function testUnauthorizedCannotMintOrUpdate() external {
+        CreatorERC721 token = _deploy721();
+        vm.prank(stranger());
+        vm.expectRevert();
+        token.mint(creator, 1, "ipfs://token-1");
+        vm.prank(creator);
+        token.mint(creator, 1, "ipfs://token-1");
+        vm.prank(stranger());
+        vm.expectRevert();
+        token.setTokenURI(1, "ipfs://bad");
+    }
+
+    function testTokenAndCollectionFreezeBlockMutationButNotTransfers() external {
+        CreatorERC721 token = _deploy721();
+        vm.startPrank(creator);
+        token.mint(creator, 1, "ipfs://token-1");
+        token.freezeToken(1);
+        vm.expectRevert(CreatorERC721.TokenIsFrozen.selector);
+        token.setTokenURI(1, "ipfs://changed");
+        token.mint(creator, 2, "ipfs://token-2");
+        token.freezeCollection();
+        vm.expectRevert(CreatorERC721.CollectionIsFrozen.selector);
+        token.mint(creator, 3, "ipfs://token-3");
+        vm.expectRevert(CreatorERC721.CollectionIsFrozen.selector);
+        token.setTokenURI(2, "ipfs://changed");
+        vm.stopPrank();
+        vm.prank(creator);
+        token.transferFrom(creator, stranger(), 1);
+        assertEq(token.ownerOf(1), stranger());
+    }
+
+    function testBatchMintAndValidation() external {
+        CreatorERC721 token = _deploy721();
+        vm.startPrank(creator);
+        uint256[] memory ids = new uint256[](2);
+        ids[0] = 10;
+        ids[1] = 11;
+        string[] memory uris = new string[](2);
+        uris[0] = "ipfs://10";
+        uris[1] = "ipfs://11";
+        token.mintBatch(creator, ids, uris);
+        assertEq(token.tokenURI(10), "ipfs://10");
+        assertEq(token.tokenURI(11), "ipfs://11");
+        vm.expectRevert(CreatorERC721.ArrayLengthMismatch.selector);
+        string[] memory shortURIs = new string[](1);
+        shortURIs[0] = "ipfs://bad";
+        token.mintBatch(creator, ids, shortURIs);
+        vm.stopPrank();
+    }
+
+    function stranger() private pure returns (address) {
+        return address(0xD00D);
+    }
 }
