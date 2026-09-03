@@ -232,3 +232,32 @@ yarn workspace @nft-marketplace/marketplace-contracts lint
 forge fmt --check
 ```
 
+## 8. T-015 upgrade governance additions
+
+The factory and settlement contracts now expose one-time proxy initializers. A
+transparent proxy starts with empty storage and calls `initialize` to assign
+application ownership to the platform multisig. Direct deployments retain their
+constructors and mark `governanceInitialized` immediately, which prevents the
+initializer from being called on the implementation itself.
+
+`CreatorCollectionFactory.initialize` validates the multisig, transfers factory
+ownership, and emits `GovernanceInitialized`. The multisig then controls
+`setImplementation`, while already-created creator collection clones remain
+immutable. `MarketplaceSettlement.initialize` additionally validates and stores
+the initial treasury and platform fee, then emits governance, treasury, and fee
+events. Its existing owner-only currency, fee, treasury, pause, and unpause
+functions therefore become multisig-only when called through a proxy.
+
+OpenZeppelin `TransparentUpgradeableProxy` creates a `ProxyAdmin` whose owner is
+the supplied multisig. The proxy's application owner and the ProxyAdmin owner are
+intentionally the same governance address. `ProxyAdmin.upgradeAndCall` can perform
+an implementation change and initialization call atomically; state stays in the
+proxy storage. The `UpgradeGovernance.t.sol` fixture requires both test signers to
+approve an exact target/calldata hash, proving that one signer or an unrelated EOA
+cannot upgrade or administer the proxied contracts.
+
+The contract package's `storage:check` command invokes Forge storage-layout
+inspection for both governed contracts. Future implementations must preserve
+existing variable order and types and may only append compatible storage. See
+`docs/T-015-implementation-guide.md` for the governance workflow and acceptance
+criteria mapping.

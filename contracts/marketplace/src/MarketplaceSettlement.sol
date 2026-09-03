@@ -68,6 +68,7 @@ contract MarketplaceSettlement is Ownable, Pausable, ReentrancyGuard {
     mapping(uint256 => Listing) private _listings;
     mapping(address => mapping(address => uint256)) private _pending;
     mapping(bytes32 => bool) public usedPurchaseIds;
+    bool public governanceInitialized;
 
     event ListingCreated(
         uint256 indexed listingId,
@@ -103,6 +104,28 @@ contract MarketplaceSettlement is Ownable, Pausable, ReentrancyGuard {
         if (initialFeeBps > MAX_PLATFORM_FEE_BPS) revert InvalidFee(initialFeeBps);
         treasury = initialTreasury;
         platformFeeBps = initialFeeBps;
+        governanceInitialized = true;
+        emit TreasuryUpdated(initialTreasury);
+        emit PlatformFeeUpdated(initialFeeBps);
+    }
+
+    error AlreadyInitialized();
+    event GovernanceInitialized(address indexed multisig);
+
+    function initialize(address platformMultisig, address initialTreasury, uint256 initialFeeBps)
+        external
+    {
+        if (governanceInitialized) revert AlreadyInitialized();
+        if (platformMultisig == address(0) || initialTreasury == address(0)) {
+            revert InvalidAddress();
+        }
+        if (initialFeeBps > MAX_PLATFORM_FEE_BPS) revert InvalidFee(initialFeeBps);
+        governanceInitialized = true;
+        _transferOwnership(platformMultisig);
+        nextListingId = 1;
+        treasury = initialTreasury;
+        platformFeeBps = initialFeeBps;
+        emit GovernanceInitialized(platformMultisig);
         emit TreasuryUpdated(initialTreasury);
         emit PlatformFeeUpdated(initialFeeBps);
     }
