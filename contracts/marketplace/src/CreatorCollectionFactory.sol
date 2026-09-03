@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-import {CollectionMetadata, CollectionStandard, ICollectionInitializable} from "./CollectionTypes.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
+import {
+    CollectionMetadata,
+    CollectionStandard,
+    ICollectionInitializable
+} from "./CollectionTypes.sol";
 
 contract CreatorCollectionFactory is Ownable {
     using Clones for address;
@@ -31,7 +35,9 @@ contract CreatorCollectionFactory is Ownable {
     mapping(address => CollectionRecord) private _collections;
     uint256 private _nonce;
 
-    event ImplementationApprovalUpdated(address indexed implementation, CollectionStandard indexed standard, bool approved);
+    event ImplementationApprovalUpdated(
+        address indexed implementation, CollectionStandard indexed standard, bool approved
+    );
     event CollectionDeployed(
         address indexed collection,
         address indexed creator,
@@ -48,9 +54,12 @@ contract CreatorCollectionFactory is Ownable {
         bytes32 salt
     );
 
-    constructor(address initialOwner) Ownable(initialOwner) {}
+    constructor(address initialOwner) Ownable(initialOwner) { }
 
-    function setImplementation(address implementation, CollectionStandard standard, bool approved) external onlyOwner {
+    function setImplementation(address implementation, CollectionStandard standard, bool approved)
+        external
+        onlyOwner
+    {
         if (implementation == address(0)) revert InvalidAddress();
         approvedImplementations[standard][implementation] = approved;
         emit ImplementationApprovalUpdated(implementation, standard, approved);
@@ -64,12 +73,22 @@ contract CreatorCollectionFactory is Ownable {
         uint96 royaltyBps,
         bytes32 salt
     ) external returns (address collection) {
-        if (implementation == address(0) || royaltyRecipient == address(0)) revert InvalidAddress();
-        if (bytes(metadata.name).length == 0 || bytes(metadata.metadataURI).length == 0) revert InvalidMetadata();
-        if (standard == CollectionStandard.ERC721 && bytes(metadata.symbol).length == 0) revert InvalidMetadata();
+        if (implementation == address(0) || royaltyRecipient == address(0)) {
+            revert InvalidAddress();
+        }
+        if (bytes(metadata.name).length == 0 || bytes(metadata.metadataURI).length == 0) {
+            revert InvalidMetadata();
+        }
+        if (standard == CollectionStandard.ERC721 && bytes(metadata.symbol).length == 0) {
+            revert InvalidMetadata();
+        }
         if (royaltyBps > 1000) revert InvalidRoyalty(royaltyBps);
-        if (!approvedImplementations[standard][implementation]) revert ImplementationNotApproved(implementation);
-        if (standard != CollectionStandard.ERC721 && standard != CollectionStandard.ERC1155) revert UnsupportedStandard();
+        if (!approvedImplementations[standard][implementation]) {
+            revert ImplementationNotApproved(implementation);
+        }
+        if (standard != CollectionStandard.ERC721 && standard != CollectionStandard.ERC1155) {
+            revert UnsupportedStandard();
+        }
 
         bytes32 deploymentSalt = salt;
         if (salt == bytes32(0)) {
@@ -80,8 +99,18 @@ contract CreatorCollectionFactory is Ownable {
         }
 
         collection = implementation.cloneDeterministic(deploymentSalt);
-        ICollectionInitializable(collection).initialize(msg.sender, metadata, royaltyRecipient, royaltyBps);
-        _storeCollection(collection, msg.sender, implementation, standard, metadata, royaltyRecipient, royaltyBps, deploymentSalt);
+        ICollectionInitializable(collection)
+            .initialize(msg.sender, metadata, royaltyRecipient, royaltyBps);
+        _storeCollection(
+            collection,
+            msg.sender,
+            implementation,
+            standard,
+            metadata,
+            royaltyRecipient,
+            royaltyBps,
+            deploymentSalt
+        );
         _emitCollectionDeployed(collection);
     }
 
@@ -124,7 +153,12 @@ contract CreatorCollectionFactory is Ownable {
         return _collections[collection];
     }
 
-    function predictCollectionAddress(CollectionStandard standard, address implementation, address creator, bytes32 salt) external view returns (address) {
+    function predictCollectionAddress(
+        CollectionStandard standard,
+        address implementation,
+        address creator,
+        bytes32 salt
+    ) external view returns (address) {
         bytes32 deploymentSalt = salt == bytes32(0) ? keccak256(abi.encode(creator, _nonce)) : salt;
         return implementation.predictDeterministicAddress(deploymentSalt, address(this));
     }
