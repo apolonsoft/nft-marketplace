@@ -11,7 +11,10 @@
     "coverage": "forge coverage --report summary",
     "gas": "forge test --gas-report",
     "typecheck": "node -e \"console.log('[marketplace-contracts] Solidity typechecking is provided by forge build')\"",
-    "generate": "node -e \"console.log('[marketplace-contracts] ABI/client generation belongs to T-016')\"",
+    "generate": "yarn workspace @nft-marketplace/contracts generate",
+    "generate:check": "yarn workspace @nft-marketplace/contracts generate:check",
+    "deploy": "node scripts/deploy.mjs",
+    "verify": "node scripts/verify.mjs",
     "docker": "node -e \"console.log('[marketplace-contracts] no contract container is defined')\""
   }
 }

@@ -1,0 +1,6 @@
+{
+  "chainId": 31337,
+  "name": "Anvil",
+  "contracts": {},
+  "config": { "multisig": "0x0000000000000000000000000000000000000000", "treasury": "0x0000000000000000000000000000000000000000", "platformFeeBps": 0 }
+}

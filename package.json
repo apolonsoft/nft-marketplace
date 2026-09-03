@@ -20,6 +20,7 @@
     "lint": "yarn format:check && yarn deps:check && turbo run lint",
     "typecheck": "turbo run typecheck",
     "generate": "turbo run generate",
+    "generate:check": "node tooling/scripts/check-contract-artifacts.mjs",
     "docker": "turbo run docker",
     "affected": "node tooling/scripts/affected.mjs",
     "format": "node tooling/scripts/format-check.mjs",
