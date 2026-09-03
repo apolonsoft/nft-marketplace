@@ -4,10 +4,22 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
-    "./abis/*": { "types": "./dist/abis/*.d.ts", "import": "./dist/abis/*.js" },
-    "./addresses": { "types": "./dist/addresses.d.ts", "import": "./dist/addresses.js" },
-    "./clients": { "types": "./dist/clients.d.ts", "import": "./dist/clients.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./abis/*": {
+      "types": "./dist/abis/*.d.ts",
+      "import": "./dist/abis/*.js"
+    },
+    "./addresses": {
+      "types": "./dist/addresses.d.ts",
+      "import": "./dist/addresses.js"
+    },
+    "./clients": {
+      "types": "./dist/clients.d.ts",
+      "import": "./dist/clients.js"
+    }
   },
   "scripts": {
     "dev": "yarn generate",

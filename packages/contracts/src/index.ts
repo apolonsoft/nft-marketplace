@@ -2,6 +2,7 @@ export * from "./types.js";
 export * from "./chains.js";
 export * from "./addresses.js";
 export * from "./clients.js";
+export { networkManifests } from "./generated-addresses.js";
 export { CreatorCollectionFactoryAbi } from "./abis/CreatorCollectionFactory.js";
 export { CreatorERC721Abi } from "./abis/CreatorERC721.js";
 export { CreatorERC1155Abi } from "./abis/CreatorERC1155.js";
