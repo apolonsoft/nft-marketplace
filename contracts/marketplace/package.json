@@ -7,6 +7,7 @@
     "build": "forge build",
     "test": "forge test",
     "lint": "forge fmt --check",
+    "storage:check": "forge inspect CreatorCollectionFactory storage-layout >/dev/null && forge inspect MarketplaceSettlement storage-layout >/dev/null",
     "coverage": "forge coverage --report summary",
     "gas": "forge test --gas-report",
     "typecheck": "node -e \"console.log('[marketplace-contracts] Solidity typechecking is provided by forge build')\"",

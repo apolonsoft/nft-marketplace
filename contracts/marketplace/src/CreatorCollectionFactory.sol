@@ -34,6 +34,7 @@ contract CreatorCollectionFactory is Ownable {
     mapping(address => mapping(bytes32 => mapping(CollectionStandard => bool))) public usedSalts;
     mapping(address => CollectionRecord) private _collections;
     uint256 private _nonce;
+    bool public governanceInitialized;
 
     event ImplementationApprovalUpdated(
         address indexed implementation, CollectionStandard indexed standard, bool approved
@@ -54,7 +55,20 @@ contract CreatorCollectionFactory is Ownable {
         bytes32 salt
     );
 
-    constructor(address initialOwner) Ownable(initialOwner) { }
+    constructor(address initialOwner) Ownable(initialOwner) {
+        governanceInitialized = true;
+    }
+
+    function initialize(address platformMultisig) external {
+        if (governanceInitialized) revert AlreadyInitialized();
+        if (platformMultisig == address(0)) revert InvalidAddress();
+        governanceInitialized = true;
+        _transferOwnership(platformMultisig);
+        emit GovernanceInitialized(platformMultisig);
+    }
+
+    error AlreadyInitialized();
+    event GovernanceInitialized(address indexed multisig);
 
     function setImplementation(address implementation, CollectionStandard standard, bool approved)
         external
