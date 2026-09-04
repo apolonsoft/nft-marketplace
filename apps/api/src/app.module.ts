@@ -16,6 +16,7 @@ import { PrivacyModule } from './privacy/privacy.module';
 import { MarketplaceReadModule } from './marketplace-read/read.module';
 import { API_CONFIG } from './common/tokens';
 import { TransactionIntentModule } from './transaction-intents/intent.module';
+import { ModerationModule } from './moderation/moderation.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { TransactionIntentModule } from './transaction-intents/intent.module';
     PrivacyModule,
     MarketplaceReadModule,
     TransactionIntentModule,
+    ModerationModule,
     SystemModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: GlobalErrorFilter }],

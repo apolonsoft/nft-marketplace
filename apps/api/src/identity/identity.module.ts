@@ -22,7 +22,8 @@ const testRepository: AuthRepository = {
   controllers: [AuthController],
   providers: [
     AuthResolver,
-    ...(process.env.NODE_ENV === 'test' ? [] : [PrismaService, PrismaAuthRepository]),
+    PrismaService,
+    ...(process.env.NODE_ENV === 'test' ? [] : [PrismaAuthRepository]),
     AuthService,
     AuthGuard,
     TokenService,

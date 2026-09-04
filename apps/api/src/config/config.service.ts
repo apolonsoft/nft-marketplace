@@ -24,6 +24,7 @@ export interface ApiConfig {
     secureCookies: boolean;
   };
   privacy: { encryptionKey: string; keyVersion: string };
+  adminWalletAllowlist: string[];
 }
 const positiveInteger = (value: string | undefined, fallback: number, name: string) => {
   const parsed = Number(value ?? fallback);
@@ -107,6 +108,7 @@ export class ConfigService {
         secureCookies: booleanValue(source.AUTH_SECURE_COOKIES, nodeEnv === 'production'),
       },
       privacy: { encryptionKey: privacyKey, keyVersion: source.PRIVACY_KEY_VERSION ?? 'v1' },
+      adminWalletAllowlist: list(source.ADMIN_WALLET_ALLOWLIST, ''),
     };
   }
 }
