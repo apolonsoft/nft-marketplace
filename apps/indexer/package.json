@@ -5,6 +5,7 @@
   "type": "module",
   "dependencies": {
     "@nft-marketplace/contracts": "workspace:*",
+    "@nft-marketplace/domain": "workspace:*",
     "@ponder/core": "^0.7.17",
     "hono": "^4.7.2",
     "viem": "^2.21.0"
