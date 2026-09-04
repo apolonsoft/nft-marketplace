@@ -13,6 +13,8 @@ model WalletProfile {
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   sessionFamilies SessionFamily[]
+  ownedApplications DeveloperApplication[] @relation("ApplicationOwner")
+  memberships ApplicationMember[]
 }
 
 model SiweNonce {
@@ -54,4 +56,100 @@ model RefreshToken {
   family              SessionFamily @relation(fields: [familyId], references: [id], onDelete: Cascade)
 
   @@index([familyId, expiresAt])
+}
+
+enum ApplicationStatus {
+  ACTIVE
+  ARCHIVED
+}
+enum ApplicationMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+enum ApiKeyEnvironment {
+  TEST
+  LIVE
+}
+
+model DeveloperApplication {
+  id             String              @id @default(uuid()) @db.Uuid
+  ownerWalletId  String              @db.Uuid
+  name           String              @db.VarChar(120)
+  slug           String              @unique @db.VarChar(80)
+  description    String?             @db.VarChar(500)
+  status         ApplicationStatus   @default(ACTIVE)
+  dailyQuota     Int                 @default(100000)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  owner          WalletProfile       @relation("ApplicationOwner", fields: [ownerWalletId], references: [id])
+  members        ApplicationMember[]
+  invitations    ApplicationInvitation[]
+  apiKeys        ApiKey[]
+  usage          ApiUsageDaily[]
+
+  @@index([ownerWalletId, status])
+}
+
+model ApplicationMember {
+  id            String                @id @default(uuid()) @db.Uuid
+  applicationId String                @db.Uuid
+  walletId      String                @db.Uuid
+  role          ApplicationMemberRole @default(MEMBER)
+  invitedAt     DateTime?
+  acceptedAt    DateTime              @default(now())
+  createdAt     DateTime              @default(now())
+  application   DeveloperApplication  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  wallet        WalletProfile         @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@unique([applicationId, walletId])
+  @@index([walletId, role])
+}
+
+model ApplicationInvitation {
+  id            String                @id @default(uuid()) @db.Uuid
+  applicationId String                @db.Uuid
+  walletAddress String                @db.VarChar(42)
+  role          ApplicationMemberRole @default(MEMBER)
+  tokenHash     String                @unique @db.Char(64)
+  expiresAt     DateTime
+  acceptedAt    DateTime?
+  revokedAt     DateTime?
+  createdAt     DateTime              @default(now())
+  application   DeveloperApplication  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId, expiresAt, acceptedAt])
+}
+
+model ApiKey {
+  id               String            @id @default(uuid()) @db.Uuid
+  applicationId    String            @db.Uuid
+  environment      ApiKeyEnvironment
+  name             String            @db.VarChar(120)
+  prefix           String            @db.VarChar(16)
+  secretHash       String            @unique @db.Char(64)
+  scopes           String[]
+  createdAt        DateTime          @default(now())
+  lastUsedAt       DateTime?
+  rotatedAt        DateTime?
+  revokedAt        DateTime?
+  replacedByKeyId  String?           @db.Uuid
+  application      DeveloperApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId, revokedAt])
+  @@index([prefix])
+}
+
+model ApiUsageDaily {
+  id             String              @id @default(uuid()) @db.Uuid
+  applicationId  String              @db.Uuid
+  keyId          String?             @db.Uuid
+  day            DateTime            @db.Date
+  endpointGroup  String              @db.VarChar(120)
+  statusClass    String              @db.VarChar(3)
+  requestCount   Int                 @default(0)
+  application    DeveloperApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@unique([applicationId, keyId, day, endpointGroup, statusClass])
+  @@index([applicationId, day])
 }
