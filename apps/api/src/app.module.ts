@@ -13,6 +13,7 @@ import { SystemModule } from './system/system.module';
 import { IdentityModule } from './identity/identity.module';
 import { DeveloperModule } from './developer/developer.module';
 import { PrivacyModule } from './privacy/privacy.module';
+import { MarketplaceReadModule } from './marketplace-read/read.module';
 import { API_CONFIG } from './common/tokens';
 
 @Module({
@@ -35,6 +36,7 @@ import { API_CONFIG } from './common/tokens';
     IdentityModule,
     DeveloperModule,
     PrivacyModule,
+    MarketplaceReadModule,
     SystemModule,
   ],
   providers: [
