@@ -1,0 +1,26 @@
+CREATE TYPE "ApplicationStatus" AS ENUM ('ACTIVE', 'ARCHIVED');
+CREATE TYPE "ApplicationMemberRole" AS ENUM ('OWNER', 'ADMIN', 'MEMBER');
+CREATE TYPE "ApiKeyEnvironment" AS ENUM ('TEST', 'LIVE');
+
+CREATE TABLE "DeveloperApplication" ("id" UUID NOT NULL, "ownerWalletId" UUID NOT NULL, "name" VARCHAR(120) NOT NULL, "slug" VARCHAR(80) NOT NULL, "description" VARCHAR(500), "status" "ApplicationStatus" NOT NULL DEFAULT 'ACTIVE', "dailyQuota" INTEGER NOT NULL DEFAULT 100000, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL, CONSTRAINT "DeveloperApplication_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "ApplicationMember" ("id" UUID NOT NULL, "applicationId" UUID NOT NULL, "walletId" UUID NOT NULL, "role" "ApplicationMemberRole" NOT NULL DEFAULT 'MEMBER', "invitedAt" TIMESTAMP(3), "acceptedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "ApplicationMember_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "ApplicationInvitation" ("id" UUID NOT NULL, "applicationId" UUID NOT NULL, "walletAddress" VARCHAR(42) NOT NULL, "role" "ApplicationMemberRole" NOT NULL DEFAULT 'MEMBER', "tokenHash" CHAR(64) NOT NULL, "expiresAt" TIMESTAMP(3) NOT NULL, "acceptedAt" TIMESTAMP(3), "revokedAt" TIMESTAMP(3), "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "ApplicationInvitation_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "ApiKey" ("id" UUID NOT NULL, "applicationId" UUID NOT NULL, "environment" "ApiKeyEnvironment" NOT NULL, "name" VARCHAR(120) NOT NULL, "prefix" VARCHAR(16) NOT NULL, "secretHash" CHAR(64) NOT NULL, "scopes" TEXT[] NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "lastUsedAt" TIMESTAMP(3), "rotatedAt" TIMESTAMP(3), "revokedAt" TIMESTAMP(3), "replacedByKeyId" UUID, CONSTRAINT "ApiKey_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "ApiUsageDaily" ("id" UUID NOT NULL, "applicationId" UUID NOT NULL, "keyId" UUID, "day" DATE NOT NULL, "endpointGroup" VARCHAR(120) NOT NULL, "statusClass" VARCHAR(3) NOT NULL, "requestCount" INTEGER NOT NULL DEFAULT 0, CONSTRAINT "ApiUsageDaily_pkey" PRIMARY KEY ("id"));
+CREATE UNIQUE INDEX "DeveloperApplication_slug_key" ON "DeveloperApplication"("slug");
+CREATE INDEX "DeveloperApplication_ownerWalletId_status_idx" ON "DeveloperApplication"("ownerWalletId", "status");
+CREATE UNIQUE INDEX "ApplicationMember_applicationId_walletId_key" ON "ApplicationMember"("applicationId", "walletId");
+CREATE INDEX "ApplicationMember_walletId_role_idx" ON "ApplicationMember"("walletId", "role");
+CREATE UNIQUE INDEX "ApplicationInvitation_tokenHash_key" ON "ApplicationInvitation"("tokenHash");
+CREATE INDEX "ApplicationInvitation_applicationId_expiresAt_acceptedAt_idx" ON "ApplicationInvitation"("applicationId", "expiresAt", "acceptedAt");
+CREATE UNIQUE INDEX "ApiKey_secretHash_key" ON "ApiKey"("secretHash");
+CREATE INDEX "ApiKey_applicationId_revokedAt_idx" ON "ApiKey"("applicationId", "revokedAt");
+CREATE INDEX "ApiKey_prefix_idx" ON "ApiKey"("prefix");
+CREATE UNIQUE INDEX "ApiUsageDaily_applicationId_keyId_day_endpointGroup_statusClass_key" ON "ApiUsageDaily"("applicationId", "keyId", "day", "endpointGroup", "statusClass");
+CREATE INDEX "ApiUsageDaily_applicationId_day_idx" ON "ApiUsageDaily"("applicationId", "day");
+ALTER TABLE "DeveloperApplication" ADD CONSTRAINT "DeveloperApplication_ownerWalletId_fkey" FOREIGN KEY ("ownerWalletId") REFERENCES "WalletProfile"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ApplicationMember" ADD CONSTRAINT "ApplicationMember_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "DeveloperApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ApplicationMember" ADD CONSTRAINT "ApplicationMember_walletId_fkey" FOREIGN KEY ("walletId") REFERENCES "WalletProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ApplicationInvitation" ADD CONSTRAINT "ApplicationInvitation_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "DeveloperApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ApiKey" ADD CONSTRAINT "ApiKey_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "DeveloperApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ApiUsageDaily" ADD CONSTRAINT "ApiUsageDaily_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "DeveloperApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;

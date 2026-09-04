@@ -11,6 +11,7 @@ import { HealthModule } from './health/health.module';
 import { ObservabilityModule } from './observability/observability.module';
 import { SystemModule } from './system/system.module';
 import { IdentityModule } from './identity/identity.module';
+import { DeveloperModule } from './developer/developer.module';
 import { API_CONFIG } from './common/tokens';
 
 @Module({
@@ -31,6 +32,7 @@ import { API_CONFIG } from './common/tokens';
     HealthModule,
     ObservabilityModule,
     IdentityModule,
+    DeveloperModule,
     SystemModule,
   ],
   providers: [
