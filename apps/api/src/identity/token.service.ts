@@ -7,7 +7,10 @@ import { API_CONFIG } from '../common/tokens';
 import type { ApiConfig } from '../config/config.service';
 import type { AccessPrincipal, RefreshTokenMaterial } from './auth.types';
 
-interface AccessKeys { privateKey: CryptoKey | KeyObject; publicKey: CryptoKey | KeyObject }
+interface AccessKeys {
+  privateKey: CryptoKey | KeyObject;
+  publicKey: CryptoKey | KeyObject;
+}
 
 @Injectable()
 export class TokenService {
@@ -19,7 +22,11 @@ export class TokenService {
 
   async issueAccessToken(principal: AccessPrincipal, now: Date) {
     const { privateKey } = await this.keys;
-    return new SignJWT({ address: principal.address, sid: principal.sessionFamilyId, typ: 'access' })
+    return new SignJWT({
+      address: principal.address,
+      sid: principal.sessionFamilyId,
+      typ: 'access',
+    })
       .setProtectedHeader({ alg: 'RS256', typ: 'JWT' })
       .setSubject(principal.walletId)
       .setIssuer(this.config.auth.issuer)
@@ -38,7 +45,13 @@ export class TokenService {
         issuer: this.config.auth.issuer,
         audience: this.config.auth.audience,
       });
-      if (payload.typ !== 'access' || typeof payload.sub !== 'string' || typeof payload.address !== 'string' || typeof payload.sid !== 'string') throw new Error('Invalid access claims');
+      if (
+        payload.typ !== 'access' ||
+        typeof payload.sub !== 'string' ||
+        typeof payload.address !== 'string' ||
+        typeof payload.sid !== 'string'
+      )
+        throw new Error('Invalid access claims');
       return { walletId: payload.sub, address: payload.address, sessionFamilyId: payload.sid };
     } catch (cause) {
       throw new AppError(ErrorCode.SESSION_EXPIRED, 'Session is expired or invalid', { cause });

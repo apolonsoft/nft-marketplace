@@ -1,8 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
-import type { AuthRepository, AuthSessionRecord, RefreshRotationResult, WalletProfileRecord } from './auth.types';
+import type {
+  AuthRepository,
+  AuthSessionRecord,
+  RefreshRotationResult,
+  WalletProfileRecord,
+} from './auth.types';
 
-const walletRecord = (wallet: { id: string; address: string; createdAt: Date }): WalletProfileRecord => ({
+const walletRecord = (wallet: {
+  id: string;
+  address: string;
+  createdAt: Date;
+}): WalletProfileRecord => ({
   id: wallet.id,
   address: wallet.address,
   createdAt: wallet.createdAt,
@@ -12,7 +21,13 @@ const walletRecord = (wallet: { id: string; address: string; createdAt: Date }):
 export class PrismaAuthRepository implements AuthRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createNonce(input: { nonce: string; address: string; domain: string; chainId: number; expiresAt: Date }) {
+  async createNonce(input: {
+    nonce: string;
+    address: string;
+    domain: string;
+    chainId: number;
+    expiresAt: Date;
+  }) {
     await this.prisma.siweNonce.create({ data: input });
   }
 
@@ -75,10 +90,16 @@ export class PrismaAuthRepository implements AuthRepository {
 
       const familyExpired = current.family.expiresAt <= input.now;
       const tokenExpired = current.expiresAt <= input.now;
-      if (current.family.revokedAt || familyExpired || tokenExpired) return { status: 'expired' } as const;
+      if (current.family.revokedAt || familyExpired || tokenExpired)
+        return { status: 'expired' } as const;
 
       if (current.usedAt || current.revokedAt) {
-        await this.revokeInTransaction(transaction, current.familyId, input.now, 'refresh-token-reuse');
+        await this.revokeInTransaction(
+          transaction,
+          current.familyId,
+          input.now,
+          'refresh-token-reuse',
+        );
         return { status: 'reuse' } as const;
       }
 
@@ -87,7 +108,12 @@ export class PrismaAuthRepository implements AuthRepository {
         data: { usedAt: input.now, replacedByTokenId: input.replacement.id },
       });
       if (claimed.count !== 1) {
-        await this.revokeInTransaction(transaction, current.familyId, input.now, 'refresh-token-reuse');
+        await this.revokeInTransaction(
+          transaction,
+          current.familyId,
+          input.now,
+          'refresh-token-reuse',
+        );
         return { status: 'reuse' } as const;
       }
 
@@ -110,16 +136,24 @@ export class PrismaAuthRepository implements AuthRepository {
     });
   }
 
-  async getActiveSession(familyId: string, walletId: string, now: Date): Promise<AuthSessionRecord | null> {
+  async getActiveSession(
+    familyId: string,
+    walletId: string,
+    now: Date,
+  ): Promise<AuthSessionRecord | null> {
     const family = await this.prisma.sessionFamily.findFirst({
       where: { id: familyId, walletId, revokedAt: null, expiresAt: { gt: now } },
       include: { wallet: true },
     });
-    return family ? { familyId: family.id, wallet: walletRecord(family.wallet), expiresAt: family.expiresAt } : null;
+    return family
+      ? { familyId: family.id, wallet: walletRecord(family.wallet), expiresAt: family.expiresAt }
+      : null;
   }
 
   async revokeFamily(familyId: string, now: Date, reason: string) {
-    await this.prisma.$transaction(async (transaction) => this.revokeInTransaction(transaction, familyId, now, reason));
+    await this.prisma.$transaction(async (transaction) =>
+      this.revokeInTransaction(transaction, familyId, now, reason),
+    );
   }
 
   async getWallet(walletId: string) {

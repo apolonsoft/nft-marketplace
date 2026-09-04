@@ -1,20 +1,277 @@
-import { ponder } from "ponder:registry";
-import { balanceId, eventId } from "@nft-marketplace/database";
-import { createDomainEventSchema, type DomainEventType } from "@nft-marketplace/domain";
+import { ponder } from 'ponder:registry';
+import { balanceId, eventId } from '@nft-marketplace/database';
+import { createDomainEventSchema, type DomainEventType } from '@nft-marketplace/domain';
 
 const chainId = Number(process.env.PONDER_CHAIN_ID ?? 31337);
-const ZERO = "0x0000000000000000000000000000000000000000";
-const provenance = (event: any) => ({ chainId, blockNumber: event.block.number, blockHash: event.block.hash ?? "0x", transactionHash: event.transaction.hash, logIndex: event.log.logIndex, confirmation: "PENDING" });
-const recordEvent = async (context: any, event: any, type: string) => { const p = provenance(event); await context.db.insert(context.tables.transactionConfirmation).values({ id: eventId(chainId, p.transactionHash, p.logIndex), eventType: type, deduplicationKey: eventId(chainId, p.transactionHash, p.logIndex), ...p }).onConflictDoNothing(); return p; };
-const publish = async (context: any, event: any, eventType: DomainEventType, payload: unknown) => { const p = provenance(event); const id = eventId(chainId, p.transactionHash, p.logIndex); const parsed = createDomainEventSchema(eventType).parse({ eventId: id, eventType, payloadVersion: 1, chainId, blockNumber: String(p.blockNumber), blockHash: p.blockHash, transactionHash: p.transactionHash, transactionIndex: event.transaction.index ?? null, logIndex: p.logIndex, deduplicationKey: id, payload }); await context.db.insert(context.tables.eventOutbox).values({ id, eventType, payloadVersion: 1, payload: JSON.stringify(parsed.payload), deduplicationKey: id, publishedAt: null, attempts: 0, lastError: null, ...p }).onConflictDoNothing(); };
-export const createModerationEvent = (input: { moderationId: string; subjectId: string; status: string; actorId?: string | null; reason?: string | null }) => ({ eventType: "MODERATION_CHANGED" as const, payloadVersion: 1 as const, payload: { moderationId: input.moderationId, subjectId: input.subjectId, status: input.status, actorId: input.actorId ?? null, reason: input.reason ?? null } });
-export const outboxRepository = { claim: async (db: any, limit = 100) => db.findMany(db.tables.eventOutbox, { limit }), ack: async (db: any, id: string) => db.update(db.tables.eventOutbox, { id }).set({ publishedAt: BigInt(Date.now()) }) };
-const applyBalance = async (context: any, event: any, collectionId: string, tokenId: bigint, owner: string, delta: bigint) => { if (owner.toLowerCase() === ZERO) return; const id = balanceId(collectionId, tokenId, owner); const current = await context.db.find(context.tables.tokenBalance, { id }); const quantity = BigInt(current?.quantity ?? 0) + delta; const p = provenance(event); if (current) await context.db.update(context.tables.tokenBalance, { id }).set({ quantity, ...p }); else await context.db.insert(context.tables.tokenBalance).values({ id, collectionId, tokenId, owner, quantity, ...p }).onConflictDoNothing(); };
-ponder.on("Factory:CollectionDeployed", async ({ event, context }: any) => { const p = await recordEvent(context, event, "CollectionDeployed"); await publish(context, event, "COLLECTION_DEPLOYED", { collection: event.args.collection, creator: event.args.creator, implementation: event.args.implementation, standard: Number(event.args.standard) === 0 ? "ERC721" : "ERC1155", name: event.args.name, symbol: event.args.symbol, metadataUri: event.args.metadataURI, royaltyRecipient: event.args.royaltyRecipient, royaltyBps: Number(event.args.royaltyBps) }); const id = event.args.collection.toLowerCase(); await context.db.insert(context.tables.collection).values({ id, creator: event.args.creator.toLowerCase(), implementation: event.args.implementation.toLowerCase(), standard: Number(event.args.standard), name: event.args.name, symbol: event.args.symbol, metadataUri: event.args.metadataURI, royaltyRecipient: event.args.royaltyRecipient.toLowerCase(), royaltyBps: Number(event.args.royaltyBps), ...p }).onConflictDoNothing(); });
-ponder.on("Settlement:ListingCreated", async ({ event, context }: any) => { const p = await recordEvent(context, event, "ListingCreated"); await publish(context, event, "LISTING_CREATED", { listingId: event.args.listingId.toString(), seller: event.args.seller, collection: event.args.collection, tokenId: event.args.tokenId.toString(), standard: Number(event.args.standard) === 0 ? "ERC721" : "ERC1155", quantity: event.args.quantity.toString(), unitPrice: event.args.unitPrice.toString(), currency: event.args.currency, expiresAt: event.args.expiresAt == null ? null : event.args.expiresAt.toString() }); const id = event.args.listingId.toString(); await context.db.insert(context.tables.listing).values({ id, seller: event.args.seller.toLowerCase(), collectionId: event.args.collection.toLowerCase(), tokenId: event.args.tokenId, standard: Number(event.args.standard), quantity: event.args.quantity, unitPrice: event.args.unitPrice, currency: event.args.currency.toLowerCase(), expiresAt: event.args.expiresAt, state: 0, ...p }).onConflictDoNothing(); });
-ponder.on("Settlement:ListingCancelled", async ({ event, context }: any) => { await recordEvent(context, event, "ListingCancelled"); await publish(context, event, "LISTING_CANCELLED", { listingId: event.args.listingId.toString() }); await context.db.update(context.tables.listing, { id: event.args.listingId.toString() }).set({ state: 1 }); });
-ponder.on("Settlement:ListingPurchased", async ({ event, context }: any) => { const p = await recordEvent(context, event, "ListingPurchased"); const id = eventId(chainId, event.transaction.hash, event.log.logIndex); const listingId = event.args.listingId.toString(); await publish(context, event, "PURCHASED", { listingId, purchaseId: event.args.purchaseId, buyer: event.args.buyer, quantity: event.args.quantity.toString(), saleAmount: event.args.saleAmount.toString(), platformFee: event.args.platformFee.toString(), royaltyAmount: event.args.royaltyAmount.toString(), royaltyRecipient: event.args.royaltyRecipient, currency: ZERO }); await context.db.insert(context.tables.purchase).values({ id, listingId, buyer: event.args.buyer.toLowerCase(), quantity: event.args.quantity, saleAmount: event.args.saleAmount, platformFee: event.args.platformFee, royaltyAmount: event.args.royaltyAmount, royaltyRecipient: event.args.royaltyRecipient.toLowerCase(), currency: ZERO, ...p }).onConflictDoNothing(); await context.db.insert(context.tables.royaltyPayment).values({ id: `${id}:royalty`, purchaseId: id, recipient: event.args.royaltyRecipient.toLowerCase(), amount: event.args.royaltyAmount, currency: ZERO, ...p }).onConflictDoNothing(); const listing = await context.db.find(context.tables.listing, { id: listingId }); if (listing) { const remaining = BigInt(listing.quantity) - BigInt(event.args.quantity); await context.db.update(context.tables.listing, { id: listingId }).set({ quantity: remaining, state: remaining === 0n ? 2 : listing.state, ...p }); } });
-ponder.on("Settlement:PaymentWithdrawn", async ({ event, context }: any) => { const p = await recordEvent(context, event, "PaymentWithdrawn"); await publish(context, event, "WITHDRAWN", { payee: event.args.payee, currency: event.args.currency, amount: event.args.amount.toString() }); await context.db.insert(context.tables.withdrawal).values({ id: eventId(chainId, event.transaction.hash, event.log.logIndex), payee: event.args.payee.toLowerCase(), currency: event.args.currency.toLowerCase(), amount: event.args.amount, ...p }).onConflictDoNothing(); });
-const publishTransfer = (standard: "ERC721" | "ERC1155", event: any, context: any) => { const a = event.args; const mint = a.from.toLowerCase() === ZERO; return publish(context, event, mint ? "MINTED" : "TRANSFERRED", mint ? { collection: event.log.address, tokenId: (a.tokenId ?? a.id).toString(), recipient: a.to, quantity: (a.value ?? 1n).toString(), tokenUri: null } : { collection: event.log.address, tokenId: (a.tokenId ?? a.id).toString(), from: a.from, to: a.to, quantity: (a.value ?? 1n).toString(), standard }); };
-ponder.on("ERC721:Transfer", async ({ event, context }: any) => { await publishTransfer("ERC721", event, context); const collectionId = event.log.address.toLowerCase(); await recordEvent(context, event, "Transfer"); await applyBalance(context, event, collectionId, event.args.tokenId, event.args.from, -1n); await applyBalance(context, event, collectionId, event.args.tokenId, event.args.to, 1n); });
-ponder.on("ERC1155:TransferSingle", async ({ event, context }: any) => { await publishTransfer("ERC1155", event, context); const collectionId = event.log.address.toLowerCase(); await recordEvent(context, event, "TransferSingle"); const quantity = BigInt(event.args.value); await applyBalance(context, event, collectionId, event.args.id, event.args.from, -quantity); await applyBalance(context, event, collectionId, event.args.id, event.args.to, quantity); });
+const ZERO = '0x0000000000000000000000000000000000000000';
+const provenance = (event: any) => ({
+  chainId,
+  blockNumber: event.block.number,
+  blockHash: event.block.hash ?? '0x',
+  transactionHash: event.transaction.hash,
+  logIndex: event.log.logIndex,
+  confirmation: 'PENDING',
+});
+const recordEvent = async (context: any, event: any, type: string) => {
+  const p = provenance(event);
+  await context.db
+    .insert(context.tables.transactionConfirmation)
+    .values({
+      id: eventId(chainId, p.transactionHash, p.logIndex),
+      eventType: type,
+      deduplicationKey: eventId(chainId, p.transactionHash, p.logIndex),
+      ...p,
+    })
+    .onConflictDoNothing();
+  return p;
+};
+const publish = async (context: any, event: any, eventType: DomainEventType, payload: unknown) => {
+  const p = provenance(event);
+  const id = eventId(chainId, p.transactionHash, p.logIndex);
+  const parsed = createDomainEventSchema(eventType).parse({
+    eventId: id,
+    eventType,
+    payloadVersion: 1,
+    chainId,
+    blockNumber: String(p.blockNumber),
+    blockHash: p.blockHash,
+    transactionHash: p.transactionHash,
+    transactionIndex: event.transaction.index ?? null,
+    logIndex: p.logIndex,
+    deduplicationKey: id,
+    payload,
+  });
+  await context.db
+    .insert(context.tables.eventOutbox)
+    .values({
+      id,
+      eventType,
+      payloadVersion: 1,
+      payload: JSON.stringify(parsed.payload),
+      deduplicationKey: id,
+      publishedAt: null,
+      attempts: 0,
+      lastError: null,
+      ...p,
+    })
+    .onConflictDoNothing();
+};
+export const createModerationEvent = (input: {
+  moderationId: string;
+  subjectId: string;
+  status: string;
+  actorId?: string | null;
+  reason?: string | null;
+}) => ({
+  eventType: 'MODERATION_CHANGED' as const,
+  payloadVersion: 1 as const,
+  payload: {
+    moderationId: input.moderationId,
+    subjectId: input.subjectId,
+    status: input.status,
+    actorId: input.actorId ?? null,
+    reason: input.reason ?? null,
+  },
+});
+export const outboxRepository = {
+  claim: async (db: any, limit = 100) => db.findMany(db.tables.eventOutbox, { limit }),
+  ack: async (db: any, id: string) =>
+    db.update(db.tables.eventOutbox, { id }).set({ publishedAt: BigInt(Date.now()) }),
+};
+const applyBalance = async (
+  context: any,
+  event: any,
+  collectionId: string,
+  tokenId: bigint,
+  owner: string,
+  delta: bigint,
+) => {
+  if (owner.toLowerCase() === ZERO) return;
+  const id = balanceId(collectionId, tokenId, owner);
+  const current = await context.db.find(context.tables.tokenBalance, { id });
+  const quantity = BigInt(current?.quantity ?? 0) + delta;
+  const p = provenance(event);
+  if (current) await context.db.update(context.tables.tokenBalance, { id }).set({ quantity, ...p });
+  else
+    await context.db
+      .insert(context.tables.tokenBalance)
+      .values({ id, collectionId, tokenId, owner, quantity, ...p })
+      .onConflictDoNothing();
+};
+ponder.on('Factory:CollectionDeployed', async ({ event, context }: any) => {
+  const p = await recordEvent(context, event, 'CollectionDeployed');
+  await publish(context, event, 'COLLECTION_DEPLOYED', {
+    collection: event.args.collection,
+    creator: event.args.creator,
+    implementation: event.args.implementation,
+    standard: Number(event.args.standard) === 0 ? 'ERC721' : 'ERC1155',
+    name: event.args.name,
+    symbol: event.args.symbol,
+    metadataUri: event.args.metadataURI,
+    royaltyRecipient: event.args.royaltyRecipient,
+    royaltyBps: Number(event.args.royaltyBps),
+  });
+  const id = event.args.collection.toLowerCase();
+  await context.db
+    .insert(context.tables.collection)
+    .values({
+      id,
+      creator: event.args.creator.toLowerCase(),
+      implementation: event.args.implementation.toLowerCase(),
+      standard: Number(event.args.standard),
+      name: event.args.name,
+      symbol: event.args.symbol,
+      metadataUri: event.args.metadataURI,
+      royaltyRecipient: event.args.royaltyRecipient.toLowerCase(),
+      royaltyBps: Number(event.args.royaltyBps),
+      ...p,
+    })
+    .onConflictDoNothing();
+});
+ponder.on('Settlement:ListingCreated', async ({ event, context }: any) => {
+  const p = await recordEvent(context, event, 'ListingCreated');
+  await publish(context, event, 'LISTING_CREATED', {
+    listingId: event.args.listingId.toString(),
+    seller: event.args.seller,
+    collection: event.args.collection,
+    tokenId: event.args.tokenId.toString(),
+    standard: Number(event.args.standard) === 0 ? 'ERC721' : 'ERC1155',
+    quantity: event.args.quantity.toString(),
+    unitPrice: event.args.unitPrice.toString(),
+    currency: event.args.currency,
+    expiresAt: event.args.expiresAt == null ? null : event.args.expiresAt.toString(),
+  });
+  const id = event.args.listingId.toString();
+  await context.db
+    .insert(context.tables.listing)
+    .values({
+      id,
+      seller: event.args.seller.toLowerCase(),
+      collectionId: event.args.collection.toLowerCase(),
+      tokenId: event.args.tokenId,
+      standard: Number(event.args.standard),
+      quantity: event.args.quantity,
+      unitPrice: event.args.unitPrice,
+      currency: event.args.currency.toLowerCase(),
+      expiresAt: event.args.expiresAt,
+      state: 0,
+      ...p,
+    })
+    .onConflictDoNothing();
+});
+ponder.on('Settlement:ListingCancelled', async ({ event, context }: any) => {
+  await recordEvent(context, event, 'ListingCancelled');
+  await publish(context, event, 'LISTING_CANCELLED', {
+    listingId: event.args.listingId.toString(),
+  });
+  await context.db
+    .update(context.tables.listing, { id: event.args.listingId.toString() })
+    .set({ state: 1 });
+});
+ponder.on('Settlement:ListingPurchased', async ({ event, context }: any) => {
+  const p = await recordEvent(context, event, 'ListingPurchased');
+  const id = eventId(chainId, event.transaction.hash, event.log.logIndex);
+  const listingId = event.args.listingId.toString();
+  await publish(context, event, 'PURCHASED', {
+    listingId,
+    purchaseId: event.args.purchaseId,
+    buyer: event.args.buyer,
+    quantity: event.args.quantity.toString(),
+    saleAmount: event.args.saleAmount.toString(),
+    platformFee: event.args.platformFee.toString(),
+    royaltyAmount: event.args.royaltyAmount.toString(),
+    royaltyRecipient: event.args.royaltyRecipient,
+    currency: ZERO,
+  });
+  await context.db
+    .insert(context.tables.purchase)
+    .values({
+      id,
+      listingId,
+      buyer: event.args.buyer.toLowerCase(),
+      quantity: event.args.quantity,
+      saleAmount: event.args.saleAmount,
+      platformFee: event.args.platformFee,
+      royaltyAmount: event.args.royaltyAmount,
+      royaltyRecipient: event.args.royaltyRecipient.toLowerCase(),
+      currency: ZERO,
+      ...p,
+    })
+    .onConflictDoNothing();
+  await context.db
+    .insert(context.tables.royaltyPayment)
+    .values({
+      id: `${id}:royalty`,
+      purchaseId: id,
+      recipient: event.args.royaltyRecipient.toLowerCase(),
+      amount: event.args.royaltyAmount,
+      currency: ZERO,
+      ...p,
+    })
+    .onConflictDoNothing();
+  const listing = await context.db.find(context.tables.listing, { id: listingId });
+  if (listing) {
+    const remaining = BigInt(listing.quantity) - BigInt(event.args.quantity);
+    await context.db
+      .update(context.tables.listing, { id: listingId })
+      .set({ quantity: remaining, state: remaining === 0n ? 2 : listing.state, ...p });
+  }
+});
+ponder.on('Settlement:PaymentWithdrawn', async ({ event, context }: any) => {
+  const p = await recordEvent(context, event, 'PaymentWithdrawn');
+  await publish(context, event, 'WITHDRAWN', {
+    payee: event.args.payee,
+    currency: event.args.currency,
+    amount: event.args.amount.toString(),
+  });
+  await context.db
+    .insert(context.tables.withdrawal)
+    .values({
+      id: eventId(chainId, event.transaction.hash, event.log.logIndex),
+      payee: event.args.payee.toLowerCase(),
+      currency: event.args.currency.toLowerCase(),
+      amount: event.args.amount,
+      ...p,
+    })
+    .onConflictDoNothing();
+});
+const publishTransfer = (standard: 'ERC721' | 'ERC1155', event: any, context: any) => {
+  const a = event.args;
+  const mint = a.from.toLowerCase() === ZERO;
+  return publish(
+    context,
+    event,
+    mint ? 'MINTED' : 'TRANSFERRED',
+    mint
+      ? {
+          collection: event.log.address,
+          tokenId: (a.tokenId ?? a.id).toString(),
+          recipient: a.to,
+          quantity: (a.value ?? 1n).toString(),
+          tokenUri: null,
+        }
+      : {
+          collection: event.log.address,
+          tokenId: (a.tokenId ?? a.id).toString(),
+          from: a.from,
+          to: a.to,
+          quantity: (a.value ?? 1n).toString(),
+          standard,
+        },
+  );
+};
+ponder.on('ERC721:Transfer', async ({ event, context }: any) => {
+  await publishTransfer('ERC721', event, context);
+  const collectionId = event.log.address.toLowerCase();
+  await recordEvent(context, event, 'Transfer');
+  await applyBalance(context, event, collectionId, event.args.tokenId, event.args.from, -1n);
+  await applyBalance(context, event, collectionId, event.args.tokenId, event.args.to, 1n);
+});
+ponder.on('ERC1155:TransferSingle', async ({ event, context }: any) => {
+  await publishTransfer('ERC1155', event, context);
+  const collectionId = event.log.address.toLowerCase();
+  await recordEvent(context, event, 'TransferSingle');
+  const quantity = BigInt(event.args.value);
+  await applyBalance(context, event, collectionId, event.args.id, event.args.from, -quantity);
+  await applyBalance(context, event, collectionId, event.args.id, event.args.to, quantity);
+});

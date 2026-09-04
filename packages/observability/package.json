@@ -17,7 +17,8 @@
     "dev": "node -e \"console.log('[observability] placeholder: implementation belongs to T-003')\"",
     "build": "node -e \"console.log('[observability] placeholder: implementation belongs to T-003')\"",
     "test": "node -e \"console.log('[observability] placeholder: tests belong to T-003 and T-070')\"",
-    "lint": "node -e \"console.log('[observability] placeholder: tooling belongs to T-003')\"",
+    "lint": "../../node_modules/.bin/eslint . --max-warnings=0 --no-error-on-unmatched-pattern",
+    "lint:fix": "../../node_modules/.bin/eslint . --fix --no-error-on-unmatched-pattern",
     "typecheck": "node -e \"console.log('[observability] placeholder: tooling belongs to T-003')\"",
     "generate": "node -e \"console.log('[observability] placeholder: generation belongs to later observability tasks')\"",
     "docker": "node -e \"console.log('[observability] placeholder: shared packages are not containerized')\""

@@ -122,4 +122,3 @@ forge fmt --check
 The governance suite verifies implementation initialization locks, proxy ownership,
 multisig administration, single-signer upgrade rejection, threshold upgrade-and-call,
 and state preservation.
-

@@ -15,6 +15,7 @@ import { DeveloperModule } from './developer/developer.module';
 import { PrivacyModule } from './privacy/privacy.module';
 import { MarketplaceReadModule } from './marketplace-read/read.module';
 import { API_CONFIG } from './common/tokens';
+import { TransactionIntentModule } from './transaction-intents/intent.module';
 
 @Module({
   imports: [
@@ -37,10 +38,9 @@ import { API_CONFIG } from './common/tokens';
     DeveloperModule,
     PrivacyModule,
     MarketplaceReadModule,
+    TransactionIntentModule,
     SystemModule,
   ],
-  providers: [
-    { provide: APP_FILTER, useClass: GlobalErrorFilter },
-  ],
+  providers: [{ provide: APP_FILTER, useClass: GlobalErrorFilter }],
 })
 export class AppModule {}

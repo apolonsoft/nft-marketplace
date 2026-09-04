@@ -7,5 +7,15 @@ import { PrivacyCrypto } from './privacy.crypto';
 import { PrismaPrivacyRepository } from './prisma-privacy.repository';
 import { PrivacyService } from './privacy.service';
 
-@Module({ imports: [DeveloperModule], controllers: [PrivacyController], providers: [PrismaPrivacyRepository, PrivacyCrypto, PrivacyService, { provide: PRIVACY_REPOSITORY, useExisting: PrismaPrivacyRepository }], exports: [PrivacyService] })
+@Module({
+  imports: [DeveloperModule],
+  controllers: [PrivacyController],
+  providers: [
+    PrismaPrivacyRepository,
+    PrivacyCrypto,
+    PrivacyService,
+    { provide: PRIVACY_REPOSITORY, useExisting: PrismaPrivacyRepository },
+  ],
+  exports: [PrivacyService],
+})
 export class PrivacyModule {}

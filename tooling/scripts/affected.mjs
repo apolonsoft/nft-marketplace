@@ -20,7 +20,7 @@ const turboArgs = [
   'typecheck',
   'test',
   `--filter=...[${base}...${head}]`,
-  '--summarize'
+  '--summarize',
 ];
 
 console.log(`Running affected tasks for ${base}...${head}`);

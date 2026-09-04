@@ -28,7 +28,7 @@ and the inherited ERC-1155 base URI while the collection is mutable.
 
 ## Freeze behavior
 
-`freezeToken(id)` permanently prevents URI changes for one minted ID. 
+`freezeToken(id)` permanently prevents URI changes for one minted ID.
 `freezeCollection()` permanently prevents all future minting and all URI changes,
 including collection URI changes. Repeated freeze calls revert. Neither freeze mode
 blocks transfers, balance reads, supply reads, or royalty reads.

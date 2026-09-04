@@ -1,3 +1,3 @@
-declare module "ponder:registry" {
+declare module 'ponder:registry' {
   export const ponder: any;
 }

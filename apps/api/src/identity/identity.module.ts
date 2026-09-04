@@ -28,11 +28,12 @@ const testRepository: AuthRepository = {
     TokenService,
     {
       provide: AUTH_REPOSITORY,
-      useFactory: (...args: [PrismaAuthRepository?]) => process.env.NODE_ENV === 'test' ? testRepository : args[0]!,
+      useFactory: (...args: [PrismaAuthRepository?]) =>
+        process.env.NODE_ENV === 'test' ? testRepository : args[0]!,
       inject: process.env.NODE_ENV === 'test' ? [] : [PrismaAuthRepository],
     },
     { provide: AUTH_CLOCK, useValue: () => new Date() },
   ],
-  exports: [AuthService, AuthGuard],
+  exports: [AuthService, AuthGuard, PrismaService],
 })
 export class IdentityModule {}

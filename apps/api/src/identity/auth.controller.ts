@@ -1,10 +1,16 @@
-import { Body, Controller, Get, HttpCode, Post, Req, Res, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiCookieAuth, ApiOkResponse, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, HttpCode, Inject, Post, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiCookieAuth,
+  ApiOkResponse,
+  ApiProperty,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import type { AccessPrincipal } from './auth.types';
 import { AuthService } from './auth.service';
 import { AuthGuard, CurrentPrincipal } from './auth.guard';
-import { Inject } from '@nestjs/common';
 import { API_CONFIG } from '../common/tokens';
 import type { ApiConfig } from '../config/config.service';
 
@@ -19,12 +25,13 @@ class VerifyDto {
   @ApiProperty() signature!: string;
 }
 
-const cookieValue = (request: Request, name: string) => request.headers.cookie
-  ?.split(';')
-  .map((part) => part.trim().split('='))
-  .find(([key]) => key === name)
-  ?.slice(1)
-  .join('=');
+const cookieValue = (request: Request, name: string) =>
+  request.headers.cookie
+    ?.split(';')
+    .map((part) => part.trim().split('='))
+    .find(([key]) => key === name)
+    ?.slice(1)
+    .join('=');
 
 @ApiTags('authentication')
 @Controller('/api/v1/auth')
@@ -55,7 +62,9 @@ export class AuthController {
   @HttpCode(200)
   @ApiCookieAuth()
   async refresh(@Req() request: Request, @Res({ passthrough: true }) response: Response) {
-    const result = await this.auth.refresh(cookieValue(request, this.config.auth.refreshCookieName) ?? '');
+    const result = await this.auth.refresh(
+      cookieValue(request, this.config.auth.refreshCookieName) ?? '',
+    );
     this.setRefreshCookie(response, result.refreshToken);
     const { refreshToken: _refreshToken, ...publicResult } = result;
     return publicResult;
@@ -65,7 +74,10 @@ export class AuthController {
   @HttpCode(204)
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
-  async revoke(@CurrentPrincipal() principal: AccessPrincipal, @Res({ passthrough: true }) response: Response) {
+  async revoke(
+    @CurrentPrincipal() principal: AccessPrincipal,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     await this.auth.revoke(principal);
     response.clearCookie(this.config.auth.refreshCookieName, this.cookieOptions());
   }
@@ -86,6 +98,11 @@ export class AuthController {
   }
 
   private cookieOptions() {
-    return { httpOnly: true, secure: this.config.auth.secureCookies, sameSite: 'strict' as const, path: '/api/v1/auth' };
+    return {
+      httpOnly: true,
+      secure: this.config.auth.secureCookies,
+      sameSite: 'strict' as const,
+      path: '/api/v1/auth',
+    };
   }
 }

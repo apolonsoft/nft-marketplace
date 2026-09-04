@@ -13,5 +13,10 @@ export interface NetworkManifest {
   readonly name: string;
   readonly rpcUrl?: string;
   readonly contracts: Record<string, ContractDeployment>;
-  readonly config: { readonly multisig: Address; readonly treasury: Address; readonly usdc?: Address; readonly platformFeeBps: number };
+  readonly config: {
+    readonly multisig: Address;
+    readonly treasury: Address;
+    readonly usdc?: Address;
+    readonly platformFeeBps: number;
+  };
 }

@@ -1,13 +1,27 @@
-import { readFileSync, readdirSync } from 'node:fs';
-const roots = ['apps', 'packages', 'contracts', 'tooling'];
-const files = ['package.json', 'turbo.json', ...roots.flatMap((root) => walk(root))].filter((file) => /\.(json|mjs|ts|tsx|md)$/.test(file));
-function walk(dir) {
-  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-    const path = `${dir}/${entry.name}`;
-    if (entry.isDirectory() && !['node_modules', '.turbo', 'dist', 'build'].includes(entry.name)) return walk(path);
-    return entry.isFile() ? [path] : [];
-  });
-}
-const bad = files.filter((file) => readFileSync(file, 'utf8').split('\n').some((line) => /[ \t]+$/.test(line)));
-if (bad.length) { console.error(`Trailing whitespace found in: ${bad.join(', ')}`); process.exit(1); }
-console.log(`Formatting check passed for ${files.length} tracked files`);
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+const mode = process.argv.includes('--write') ? '--write' : '--check';
+const patterns = [
+  '**/*.{js,mjs,cjs,ts,tsx,json,md,yml,yaml,css}',
+  '!**/node_modules/**',
+  '!**/dist/**',
+  '!**/build/**',
+  '!**/.next/**',
+  '!**/generated/**',
+  '!**/artifacts/**',
+  '!contracts/marketplace/lib/**',
+  '!packages/contracts/src/abis/**',
+  '!packages/contracts/src/generated-addresses.ts',
+  '!packages/contracts/deployments/**',
+];
+const result = spawnSync(
+  fileURLToPath(new URL('../../node_modules/.bin/prettier', import.meta.url)),
+  [
+    mode,
+    '--config',
+    fileURLToPath(new URL('../../packages/config/prettier.config.mjs', import.meta.url)),
+    ...patterns,
+  ],
+  { stdio: 'inherit', shell: process.platform === 'win32' },
+);
+process.exit(result.status ?? 1);

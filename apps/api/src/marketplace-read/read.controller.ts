@@ -7,7 +7,13 @@ import type { ReadQuery, ReadResource } from './read.types';
 @Controller('/api/v1')
 export class MarketplaceReadController {
   constructor(private readonly service: MarketplaceReadService) {}
-  @Get('discover') discover(@Query() query: ReadQuery) { return this.service.discover(query); }
-  @Get('search') search(@Query() query: ReadQuery & { resource?: ReadResource }) { return this.service.search(query); }
-  @Get(':resource') resource(@Param('resource') resource: ReadResource, @Query() query: ReadQuery) { return this.service.page(resource, query); }
+  @Get('discover') discover(@Query() query: ReadQuery) {
+    return this.service.discover(query);
+  }
+  @Get('search') search(@Query() query: ReadQuery & { resource?: ReadResource }) {
+    return this.service.search(query);
+  }
+  @Get(':resource') resource(@Param('resource') resource: ReadResource, @Query() query: ReadQuery) {
+    return this.service.page(resource, query);
+  }
 }

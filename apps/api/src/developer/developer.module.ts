@@ -6,5 +6,15 @@ import { DeveloperService } from './developer.service';
 import { PrismaDeveloperRepository } from './prisma-developer.repository';
 import { ApiKeyGuard } from './api-key.guard';
 
-@Module({ imports: [IdentityModule], controllers: [DeveloperController], providers: [DeveloperService, PrismaDeveloperRepository, ApiKeyGuard, { provide: DEVELOPER_REPOSITORY, useExisting: PrismaDeveloperRepository }], exports: [DeveloperService, DEVELOPER_REPOSITORY, ApiKeyGuard] })
+@Module({
+  imports: [IdentityModule],
+  controllers: [DeveloperController],
+  providers: [
+    DeveloperService,
+    PrismaDeveloperRepository,
+    ApiKeyGuard,
+    { provide: DEVELOPER_REPOSITORY, useExisting: PrismaDeveloperRepository },
+  ],
+  exports: [DeveloperService, DEVELOPER_REPOSITORY, ApiKeyGuard],
+})
 export class DeveloperModule {}

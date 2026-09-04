@@ -1,5 +1,5 @@
-import type { Address, ChainId, NetworkManifest } from "./types.js";
-import { addresses } from "./generated-addresses.js";
+import type { Address, ChainId, NetworkManifest } from './types.js';
+import { addresses } from './generated-addresses.js';
 
 export { addresses };
 
@@ -10,5 +10,7 @@ export function addressOf(chainId: ChainId, contract: string): Address {
 }
 
 export function manifestAddresses(manifest: NetworkManifest): Record<string, Address> {
-  return Object.fromEntries(Object.entries(manifest.contracts).map(([name, deployment]) => [name, deployment.address]));
+  return Object.fromEntries(
+    Object.entries(manifest.contracts).map(([name, deployment]) => [name, deployment.address]),
+  );
 }

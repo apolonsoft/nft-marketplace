@@ -13,7 +13,8 @@
     "dev": "node -e \"console.log('[database] placeholder: implementation belongs to later data tasks')\"",
     "build": "node -e \"console.log('[database] placeholder: implementation belongs to later data tasks')\"",
     "test": "node -e \"console.log('[database] placeholder: tests belong to later data tasks and T-070')\"",
-    "lint": "node -e \"console.log('[database] placeholder: tooling belongs to T-003')\"",
+    "lint": "../../node_modules/.bin/eslint . --max-warnings=0 --no-error-on-unmatched-pattern",
+    "lint:fix": "../../node_modules/.bin/eslint . --fix --no-error-on-unmatched-pattern",
     "typecheck": "../../node_modules/.bin/tsc -p tsconfig.json --noEmit",
     "generate": "node -e \"console.log('[database] placeholder: schema generation belongs to later data tasks')\"",
     "docker": "node -e \"console.log('[database] placeholder: shared packages are not containerized')\""
