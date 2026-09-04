@@ -29,6 +29,8 @@ Configuration is validated before startup. Development has local defaults; produ
 
 `yarn workspace @nft-marketplace/api generate` initializes the module graph without listening and writes `generated/openapi.json` and `generated/schema.graphql`. Generated files must not be edited manually. Local API imports are extensionless; `tsx` resolves them for development, tests, and generation, while `esbuild` bundles them into `dist/index.js` for the Node production runtime. TypeScript is used for validation (`typecheck`/`build`).
 
+Use `yarn workspace @nft-marketplace/api start:dev` for hot-reloaded source development. Run `yarn workspace @nft-marketplace/api build` before `yarn workspace @nft-marketplace/api start:prod`; `start:prod` executes the existing bundle only and fails fast when `dist/index.js` is absent.
+
 ## Step 3: Request correlation and logging
 
 Every HTTP request accepts `x-request-id` when it contains 1-128 safe ASCII identifier characters; otherwise the API generates a UUID. The ID is returned in the response header, stored in async request context, and included in logs and error bodies.
