@@ -12,6 +12,7 @@ import { ObservabilityModule } from './observability/observability.module';
 import { SystemModule } from './system/system.module';
 import { IdentityModule } from './identity/identity.module';
 import { DeveloperModule } from './developer/developer.module';
+import { PrivacyModule } from './privacy/privacy.module';
 import { API_CONFIG } from './common/tokens';
 
 @Module({
@@ -33,6 +34,7 @@ import { API_CONFIG } from './common/tokens';
     ObservabilityModule,
     IdentityModule,
     DeveloperModule,
+    PrivacyModule,
     SystemModule,
   ],
   providers: [

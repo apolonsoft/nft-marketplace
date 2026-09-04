@@ -23,6 +23,7 @@ export interface ApiConfig {
     refreshCookieName: string;
     secureCookies: boolean;
   };
+  privacy: { encryptionKey: string; keyVersion: string };
 }
 const positiveInteger = (value: string | undefined, fallback: number, name: string) => { const parsed = Number(value ?? fallback); if (!Number.isInteger(parsed) || parsed <= 0) throw new Error(`${name} must be a positive integer`); return parsed; };
 const booleanValue = (value: string | undefined, fallback: boolean) => value === undefined ? fallback : value === 'true';
@@ -35,9 +36,11 @@ export class ConfigService {
     const nodeEnv = source.NODE_ENV ?? 'development';
     const privateKey = key(source.AUTH_ACCESS_PRIVATE_KEY);
     const publicKey = key(source.AUTH_ACCESS_PUBLIC_KEY);
+    const privacyKey = source.PRIVACY_ENCRYPTION_KEY ?? (nodeEnv === 'production' ? undefined : 'development-only-key-change-me');
     if (!['development', 'test', 'production'].includes(nodeEnv)) throw new Error('NODE_ENV must be development, test, or production');
     if (nodeEnv === 'production' && (!source.DATABASE_URL || !source.INDEXER_HEALTH_URL)) throw new Error('DATABASE_URL and INDEXER_HEALTH_URL are required in production');
     if (nodeEnv === 'production' && (!source.AUTH_ACCESS_PRIVATE_KEY || !source.AUTH_ACCESS_PUBLIC_KEY)) throw new Error('AUTH_ACCESS_PRIVATE_KEY and AUTH_ACCESS_PUBLIC_KEY are required in production');
+    if (!privacyKey || privacyKey.length < 16) throw new Error('PRIVACY_ENCRYPTION_KEY must be at least 16 characters');
     return {
       nodeEnv: nodeEnv as ApiConfig['nodeEnv'],
       port: positiveInteger(source.PORT, 3001, 'PORT'),
@@ -61,6 +64,7 @@ export class ConfigService {
         refreshCookieName: source.AUTH_REFRESH_COOKIE_NAME ?? 'nft_refresh',
         secureCookies: booleanValue(source.AUTH_SECURE_COOKIES, nodeEnv === 'production'),
       },
+      privacy: { encryptionKey: privacyKey, keyVersion: source.PRIVACY_KEY_VERSION ?? 'v1' },
     };
   }
 }
