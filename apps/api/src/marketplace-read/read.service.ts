@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { AppError, ErrorCode } from '@nft-marketplace/config/errors';
 import { decodeCursor, encodeCursor } from './cursor';
 import type {
@@ -8,6 +8,7 @@ import type {
   ReadResource,
   ReadRow,
   ReadSort,
+  ModerationVisibility,
 } from './read.types';
 
 const resources: ReadResource[] = [
@@ -29,6 +30,7 @@ const asString = (value: unknown) => (value === undefined || value === null ? ''
 export class MarketplaceReadService {
   constructor(
     @Inject('MARKETPLACE_READ_REPOSITORY') private readonly repository: MarketplaceReadRepository,
+    @Optional() @Inject('MODERATION_VISIBILITY') private readonly moderation?: ModerationVisibility,
   ) {}
 
   async page(resource: ReadResource, input: ReadQuery = {}): Promise<ReadPage> {
@@ -52,6 +54,15 @@ export class MarketplaceReadService {
     if (input.after) decodeCursor(input.after, resource, sort);
     if (input.before) decodeCursor(input.before, resource, sort);
     let rows = await this.repository.query(resource, input);
+    if (this.moderation && ['collections', 'nfts', 'listings', 'creators'].includes(resource)) {
+      const hidden = new Set(
+        await this.moderation.hiddenIds(
+          resource === 'creators' ? ('profiles' as ReadResource) : resource,
+          rows.map((row) => row.id),
+        ),
+      );
+      rows = rows.filter((row) => !hidden.has(row.id));
+    }
     rows = rows.filter(
       (row) => input.includeStale || !(row.stale === true || row.state === 'STALE'),
     );

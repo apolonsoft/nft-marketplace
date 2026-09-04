@@ -47,3 +47,6 @@ export interface ReadPage {
 export interface MarketplaceReadRepository {
   query(resource: ReadResource, query: ReadQuery): Promise<ReadRow[]>;
 }
+export interface ModerationVisibility {
+  hiddenIds(resource: ReadResource, ids: string[]): Promise<string[]>;
+}

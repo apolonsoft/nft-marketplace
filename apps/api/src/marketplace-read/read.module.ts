@@ -4,15 +4,18 @@ import { MarketplaceReadResolver } from './read.resolver';
 import { MarketplaceReadService } from './read.service';
 import { PostgresMarketplaceReadRepository } from './read.repository';
 import { GraphqlComplexityMiddleware } from './read.complexity';
+import { ModerationModule } from '../moderation/moderation.module';
 
 @Module({
   controllers: [MarketplaceReadController],
+  imports: [ModerationModule],
   providers: [
     MarketplaceReadResolver,
     MarketplaceReadService,
     PostgresMarketplaceReadRepository,
     GraphqlComplexityMiddleware,
     { provide: 'MARKETPLACE_READ_REPOSITORY', useExisting: PostgresMarketplaceReadRepository },
+    { provide: 'MODERATION_VISIBILITY', useExisting: 'MODERATION_REPOSITORY' },
   ],
   exports: [MarketplaceReadService],
 })

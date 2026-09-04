@@ -23,6 +23,9 @@ model WalletProfile {
   consentGrants ConsentGrant[]
   privacyAudits PrivacyAudit[]
   transactionIntents TransactionIntent[]
+  adminAllowlistEntries AdminWallet[]
+  reports UserReport[]
+  adminAuditLogs AdminAuditLog[]
 }
 
 model SiweNonce {
@@ -269,4 +272,89 @@ model TransactionIntent {
   wallet         WalletProfile @relation(fields: [walletId], references: [id], onDelete: Cascade)
   @@unique([walletId, idempotencyKey])
   @@index([walletId, status, expiresAt])
+}
+
+enum AdminWalletStatus {
+  ACTIVE
+  REVOKED
+}
+enum ModerationTargetType {
+  COLLECTION
+  NFT
+  LISTING
+  PROFILE
+}
+enum ReportCategory {
+  SPAM
+  FRAUD
+  COPYRIGHT
+  HARASSMENT
+  OTHER
+}
+enum ReportStatus {
+  OPEN
+  RESOLVED
+}
+enum ModerationStatus {
+  VISIBLE
+  HIDDEN
+  RESOLVED
+}
+
+model AdminWallet {
+  id String @id @default(uuid()) @db.Uuid
+  walletId String @unique @db.Uuid
+  status AdminWalletStatus @default(ACTIVE)
+  createdAt DateTime @default(now())
+  revokedAt DateTime?
+  wallet WalletProfile @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  @@index([status, createdAt])
+}
+
+model ModerationSubject {
+  id String @id @default(uuid()) @db.Uuid
+  targetType ModerationTargetType
+  targetId String @db.VarChar(255)
+  status ModerationStatus @default(VISIBLE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  hiddenAt DateTime?
+  resolvedAt DateTime?
+  @@unique([targetType, targetId])
+  @@index([status, targetType, targetId])
+}
+
+model UserReport {
+  id String @id @default(uuid()) @db.Uuid
+  reporterWalletId String @db.Uuid
+  targetType ModerationTargetType
+  targetId String @db.VarChar(255)
+  category ReportCategory
+  description String @db.VarChar(2000)
+  evidenceUrl String? @db.VarChar(2048)
+  status ReportStatus @default(OPEN)
+  resolutionReason String? @db.VarChar(1000)
+  createdAt DateTime @default(now())
+  resolvedAt DateTime?
+  reporter WalletProfile @relation(fields: [reporterWalletId], references: [id], onDelete: Cascade)
+  @@index([reporterWalletId, createdAt])
+  @@index([targetType, targetId, status, createdAt])
+}
+
+model AdminAuditLog {
+  id String @id @default(uuid()) @db.Uuid
+  actorWalletId String @db.Uuid
+  action String @db.VarChar(64)
+  targetType ModerationTargetType
+  targetId String @db.VarChar(255)
+  reason String @db.VarChar(1000)
+  previousStatus String?
+  newStatus String?
+  requestId String? @db.VarChar(128)
+  metadata Json?
+  createdAt DateTime @default(now())
+  actor WalletProfile @relation(fields: [actorWalletId], references: [id], onDelete: Restrict)
+  @@index([actorWalletId, createdAt])
+  @@index([targetType, targetId, createdAt])
+  @@index([action, createdAt])
 }
