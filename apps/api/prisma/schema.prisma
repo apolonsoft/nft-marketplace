@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model WalletProfile {
+  id             String          @id @default(uuid()) @db.Uuid
+  address        String          @unique @db.VarChar(42)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  sessionFamilies SessionFamily[]
+}
+
+model SiweNonce {
+  id         String    @id @default(uuid()) @db.Uuid
+  nonce      String    @unique @db.VarChar(64)
+  address    String    @db.VarChar(42)
+  domain     String    @db.VarChar(255)
+  chainId    Int
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([address, domain, chainId, expiresAt])
+}
+
+model SessionFamily {
+  id            String         @id @default(uuid()) @db.Uuid
+  walletId      String         @db.Uuid
+  expiresAt     DateTime
+  revokedAt     DateTime?
+  revokeReason  String?        @db.VarChar(64)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  wallet        WalletProfile  @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  refreshTokens RefreshToken[]
+
+  @@index([walletId, revokedAt])
+}
+
+model RefreshToken {
+  id                 String        @id @default(uuid()) @db.Uuid
+  familyId           String        @db.Uuid
+  tokenHash           String        @unique @db.Char(64)
+  expiresAt           DateTime
+  usedAt              DateTime?
+  revokedAt           DateTime?
+  replacedByTokenId   String?       @db.Uuid
+  createdAt           DateTime      @default(now())
+  family              SessionFamily @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([familyId, expiresAt])
+}

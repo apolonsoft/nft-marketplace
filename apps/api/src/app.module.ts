@@ -10,6 +10,7 @@ import { GlobalErrorFilter } from './common/errors';
 import { HealthModule } from './health/health.module';
 import { ObservabilityModule } from './observability/observability.module';
 import { SystemModule } from './system/system.module';
+import { IdentityModule } from './identity/identity.module';
 import { API_CONFIG } from './common/tokens';
 
 @Module({
@@ -23,12 +24,13 @@ import { API_CONFIG } from './common/tokens';
         autoSchemaFile: true,
         sortSchema: true,
         playground: config.docsEnabled,
-        context: ({ req }: { req: { requestId?: string } }) => ({ requestId: req.requestId }),
+        context: ({ req }: { req: { requestId?: string } }) => ({ req }),
         formatError: (error: GraphQLFormattedError) => error,
       }),
     }),
     HealthModule,
     ObservabilityModule,
+    IdentityModule,
     SystemModule,
   ],
   providers: [
