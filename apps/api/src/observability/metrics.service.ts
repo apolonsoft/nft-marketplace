@@ -1,0 +1,3 @@
+import { Injectable } from '@nestjs/common';
+import { Counter, Histogram, Registry, collectDefaultMetrics } from 'prom-client';
+@Injectable() export class MetricsService { readonly registry = new Registry(); readonly requests = new Counter({ name: 'api_http_requests_total', help: 'Completed API HTTP requests', labelNames: ['method', 'route', 'status'], registers: [this.registry] }); readonly duration = new Histogram({ name: 'api_http_request_duration_seconds', help: 'API HTTP request duration', labelNames: ['method', 'route', 'status'], registers: [this.registry] }); constructor() { collectDefaultMetrics({ register: this.registry, prefix: 'api_' }); } }

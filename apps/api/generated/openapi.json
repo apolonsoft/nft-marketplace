@@ -1,0 +1,78 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/health/live": {
+      "get": {
+        "operationId": "HealthController_live",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Process liveness",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "operationId": "HealthController_ready",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "503": {
+            "description": ""
+          }
+        },
+        "summary": "Dependency readiness",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/metrics": {
+      "get": {
+        "operationId": "MetricsController_get",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Metrics"
+        ]
+      }
+    },
+    "/api/v1/system": {
+      "get": {
+        "operationId": "SystemController_get",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "API version information",
+        "tags": [
+          "system"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "NFT Marketplace API",
+    "description": "NFT marketplace REST API",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "schemas": {}
+  }
+}
