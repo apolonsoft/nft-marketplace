@@ -29,12 +29,7 @@
     },
     "generate": {
       "dependsOn": ["^generate"],
-      "outputs": [
-        "generated/**",
-        "src/generated/**",
-        "artifacts/**",
-        "public/generated/**"
-      ]
+      "outputs": ["generated/**", "src/generated/**", "artifacts/**", "public/generated/**"]
     },
     "docker": {
       "cache": false

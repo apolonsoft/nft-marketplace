@@ -1,5 +1,41 @@
 import { describe, expect, it } from 'vitest';
 import { createDomainEventSchema } from './events.js';
 
-const base = { eventId: '31337:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:1', payloadVersion: 1 as const, chainId: 31337, blockNumber: '1', blockHash: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', transactionHash: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', transactionIndex: 0, logIndex: 1, deduplicationKey: '31337:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:1' };
-describe('domain events', () => { it('validates a versioned transfer', () => { expect(createDomainEventSchema('TRANSFERRED').parse({ ...base, eventType: 'TRANSFERRED', payload: { collection: '0x1111111111111111111111111111111111111111', tokenId: '1', from: '0x2222222222222222222222222222222222222222', to: '0x3333333333333333333333333333333333333333', quantity: '1', standard: 'ERC721' } })).toBeTruthy(); }); it('rejects an unstable payload', () => { expect(() => createDomainEventSchema('WITHDRAWN').parse({ ...base, eventType: 'WITHDRAWN', payload: { payee: 'bad' } })).toThrow(); }); });
+const base = {
+  eventId: '31337:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:1',
+  payloadVersion: 1 as const,
+  chainId: 31337,
+  blockNumber: '1',
+  blockHash: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+  transactionHash: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  transactionIndex: 0,
+  logIndex: 1,
+  deduplicationKey: '31337:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:1',
+};
+describe('domain events', () => {
+  it('validates a versioned transfer', () => {
+    expect(
+      createDomainEventSchema('TRANSFERRED').parse({
+        ...base,
+        eventType: 'TRANSFERRED',
+        payload: {
+          collection: '0x1111111111111111111111111111111111111111',
+          tokenId: '1',
+          from: '0x2222222222222222222222222222222222222222',
+          to: '0x3333333333333333333333333333333333333333',
+          quantity: '1',
+          standard: 'ERC721',
+        },
+      }),
+    ).toBeTruthy();
+  });
+  it('rejects an unstable payload', () => {
+    expect(() =>
+      createDomainEventSchema('WITHDRAWN').parse({
+        ...base,
+        eventType: 'WITHDRAWN',
+        payload: { payee: 'bad' },
+      }),
+    ).toThrow();
+  });
+});

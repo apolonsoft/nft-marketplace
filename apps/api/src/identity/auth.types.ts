@@ -23,7 +23,13 @@ export type RefreshRotationResult =
   | { status: 'invalid' };
 
 export interface AuthRepository {
-  createNonce(input: { nonce: string; address: string; domain: string; chainId: number; expiresAt: Date }): Promise<void>;
+  createNonce(input: {
+    nonce: string;
+    address: string;
+    domain: string;
+    chainId: number;
+    expiresAt: Date;
+  }): Promise<void>;
   consumeNonceAndCreateSession(input: {
     nonce: string;
     address: string;
@@ -33,8 +39,16 @@ export interface AuthRepository {
     sessionExpiresAt: Date;
     refreshToken: RefreshTokenMaterial;
   }): Promise<AuthSessionRecord | null>;
-  rotateRefreshToken(input: { currentHash: string; replacement: RefreshTokenMaterial; now: Date }): Promise<RefreshRotationResult>;
-  getActiveSession(familyId: string, walletId: string, now: Date): Promise<AuthSessionRecord | null>;
+  rotateRefreshToken(input: {
+    currentHash: string;
+    replacement: RefreshTokenMaterial;
+    now: Date;
+  }): Promise<RefreshRotationResult>;
+  getActiveSession(
+    familyId: string,
+    walletId: string,
+    now: Date,
+  ): Promise<AuthSessionRecord | null>;
   revokeFamily(familyId: string, now: Date, reason: string): Promise<void>;
   getWallet(walletId: string): Promise<WalletProfileRecord | null>;
 }

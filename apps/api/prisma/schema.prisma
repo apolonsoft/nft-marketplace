@@ -22,6 +22,7 @@ model WalletProfile {
   privacySettings ProfilePrivacySetting[]
   consentGrants ConsentGrant[]
   privacyAudits PrivacyAudit[]
+  transactionIntents TransactionIntent[]
 }
 
 model SiweNonce {
@@ -222,4 +223,50 @@ model PrivacyAudit {
   application   DeveloperApplication? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
   @@index([walletId, createdAt])
   @@index([applicationId, createdAt])
+}
+
+enum IntentOperation {
+  DEPLOY_COLLECTION
+  MINT
+  MINT_BATCH
+  APPROVE
+  SET_APPROVAL_FOR_ALL
+  CREATE_LISTING
+  PURCHASE
+  CANCEL_LISTING
+  WITHDRAW
+}
+enum IntentStatus {
+  CREATED
+  SUBMITTED
+  CONFIRMED
+  FAILED
+  EXPIRED
+  CONSUMED
+}
+
+model TransactionIntent {
+  idempotencyKey String        @db.VarChar(128)
+  id             String        @id @default(uuid()) @db.Uuid
+  walletId       String        @db.Uuid
+  operation      IntentOperation
+  chainId        Int
+  requestHash    String        @db.Char(64)
+  to             String        @db.VarChar(42)
+  data           String        @db.Text
+  value          String        @default("0") @db.VarChar(78)
+  gas            String?       @db.VarChar(78)
+  status         IntentStatus  @default(CREATED)
+  expiresAt      DateTime
+  txHash         String?       @db.VarChar(66)
+  failureCode    String?       @db.VarChar(64)
+  failureDetails Json?
+  createdAt      DateTime      @default(now())
+  submittedAt    DateTime?
+  confirmedAt    DateTime?
+  failedAt       DateTime?
+  consumedAt     DateTime?
+  wallet         WalletProfile @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  @@unique([walletId, idempotencyKey])
+  @@index([walletId, status, expiresAt])
 }

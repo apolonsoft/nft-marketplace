@@ -18,6 +18,10 @@ export const required = (name) => (value) => {
   return value;
 };
 
-export const optional = (fallback = undefined) => (value) => value ?? fallback;
+export const optional =
+  (fallback = undefined) =>
+  (value) =>
+    value ?? fallback;
 
-export const asPublicEnv = (env, keys) => Object.freeze(Object.fromEntries(keys.filter((key) => key in env).map((key) => [key, env[key]])));
+export const asPublicEnv = (env, keys) =>
+  Object.freeze(Object.fromEntries(keys.filter((key) => key in env).map((key) => [key, env[key]])));

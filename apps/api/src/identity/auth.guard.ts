@@ -5,9 +5,10 @@ import { AppError, ErrorCode } from '@nft-marketplace/config/errors';
 import type { AuthenticatedRequest } from './auth.types';
 import { AuthService } from './auth.service';
 
-const requestFromContext = (context: ExecutionContext): AuthenticatedRequest => context.getType<'graphql'>() === 'graphql'
-  ? GqlExecutionContext.create(context).getContext<{ req: AuthenticatedRequest }>().req
-  : context.switchToHttp().getRequest<AuthenticatedRequest>();
+const requestFromContext = (context: ExecutionContext): AuthenticatedRequest =>
+  context.getType<'graphql'>() === 'graphql'
+    ? GqlExecutionContext.create(context).getContext<{ req: AuthenticatedRequest }>().req
+    : context.switchToHttp().getRequest<AuthenticatedRequest>();
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -17,10 +18,13 @@ export class AuthGuard implements CanActivate {
     const request = requestFromContext(context);
     const authorization = request.headers.authorization;
     const value = Array.isArray(authorization) ? authorization[0] : authorization;
-    if (typeof value !== 'string' || !value.startsWith('Bearer ')) throw new AppError(ErrorCode.AUTHENTICATION, 'Bearer access token is required');
+    if (typeof value !== 'string' || !value.startsWith('Bearer '))
+      throw new AppError(ErrorCode.AUTHENTICATION, 'Bearer access token is required');
     request.user = await this.auth.authenticateAccessToken(value.slice(7));
     return true;
   }
 }
 
-export const CurrentPrincipal = createParamDecorator((_data: unknown, context: ExecutionContext) => requestFromContext(context).user);
+export const CurrentPrincipal = createParamDecorator(
+  (_data: unknown, context: ExecutionContext) => requestFromContext(context).user,
+);

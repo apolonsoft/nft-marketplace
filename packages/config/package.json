@@ -22,7 +22,8 @@
     "dev": "node -e \"console.log('[config] placeholder: implementation belongs to T-003')\"",
     "build": "node -e \"console.log('[config] placeholder: implementation belongs to T-003')\"",
     "test": "node -e \"console.log('[config] placeholder: tests belong to T-003 and T-070')\"",
-    "lint": "node -e \"console.log('[config] placeholder: tooling belongs to T-003')\"",
+    "lint": "../../node_modules/.bin/eslint . --max-warnings=0",
+    "lint:fix": "../../node_modules/.bin/eslint . --fix",
     "typecheck": "node -e \"console.log('[config] placeholder: tooling belongs to T-003')\"",
     "generate": "node -e \"console.log('[config] placeholder: generation belongs to T-003')\"",
     "docker": "node -e \"console.log('[config] placeholder: shared packages are not containerized')\""

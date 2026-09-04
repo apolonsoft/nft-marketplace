@@ -29,7 +29,8 @@
     "dev": "node -e \"console.log('[api-client] placeholder: implementation belongs to T-005')\"",
     "build": "../../node_modules/.bin/tsc -p tsconfig.build.json",
     "test": "../../node_modules/.bin/vitest run --config vitest.config.ts",
-    "lint": "node -e \"console.log('[api-client] placeholder: tooling belongs to T-003')\"",
+    "lint": "../../node_modules/.bin/eslint . --max-warnings=0",
+    "lint:fix": "../../node_modules/.bin/eslint . --fix",
     "typecheck": "../../node_modules/.bin/tsc -p tsconfig.json --noEmit",
     "generate": "node --experimental-strip-types ../../tooling/codegen/src/generate.ts",
     "docker": "node -e \"console.log('[api-client] placeholder: shared packages are not containerized')\""

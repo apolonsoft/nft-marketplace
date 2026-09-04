@@ -1,5 +1,5 @@
-import type { Address, ChainId } from "./types.js";
-import { addressOf } from "./addresses.js";
+import type { Address, ChainId } from './types.js';
+import { addressOf } from './addresses.js';
 
 export interface ContractClientConfig<TAbi extends readonly unknown[] = readonly unknown[]> {
   readonly address: Address;
@@ -7,6 +7,10 @@ export interface ContractClientConfig<TAbi extends readonly unknown[] = readonly
   readonly chainId: ChainId;
 }
 
-export function contractConfig<TAbi extends readonly unknown[]>(chainId: ChainId, name: string, abi: TAbi): ContractClientConfig<TAbi> {
+export function contractConfig<TAbi extends readonly unknown[]>(
+  chainId: ChainId,
+  name: string,
+  abi: TAbi,
+): ContractClientConfig<TAbi> {
   return { address: addressOf(chainId, name), abi, chainId };
 }

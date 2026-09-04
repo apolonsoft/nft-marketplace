@@ -12,16 +12,16 @@ The application uses Express. Operational endpoints remain at the root, public R
 
 Configuration is validated before startup. Development has local defaults; production requires explicit dependency URLs.
 
-| Variable | Development default | Meaning |
-| --- | --- | --- |
-| `NODE_ENV` | `development` | `development`, `test`, or `production` |
-| `PORT` | `3001` | API listen port |
-| `DATABASE_URL` | local PostgreSQL URL | Database readiness target |
-| `INDEXER_HEALTH_URL` | local indexer health URL | Indexer freshness source |
-| `INDEXER_MAX_STALENESS_MS` | `60000` | Maximum indexed-data age |
-| `DEPENDENCY_TIMEOUT_MS` | `2000` | Per-probe timeout |
-| `API_DOCS_ENABLED` | enabled outside production | Interactive docs switch |
-| `LOG_LEVEL` | `info` | Structured logger level |
+| Variable                   | Development default        | Meaning                                |
+| -------------------------- | -------------------------- | -------------------------------------- |
+| `NODE_ENV`                 | `development`              | `development`, `test`, or `production` |
+| `PORT`                     | `3001`                     | API listen port                        |
+| `DATABASE_URL`             | local PostgreSQL URL       | Database readiness target              |
+| `INDEXER_HEALTH_URL`       | local indexer health URL   | Indexer freshness source               |
+| `INDEXER_MAX_STALENESS_MS` | `60000`                    | Maximum indexed-data age               |
+| `DEPENDENCY_TIMEOUT_MS`    | `2000`                     | Per-probe timeout                      |
+| `API_DOCS_ENABLED`         | enabled outside production | Interactive docs switch                |
+| `LOG_LEVEL`                | `info`                     | Structured logger level                |
 
 ## Step 2: Transports and generated documentation
 

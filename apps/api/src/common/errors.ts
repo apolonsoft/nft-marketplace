@@ -4,22 +4,83 @@ import { GqlArgumentsHost } from '@nestjs/graphql';
 import { GraphQLError } from 'graphql';
 import { AppError, ErrorCode } from '@nft-marketplace/config/errors';
 import { currentRequestId } from './request-context';
-export interface ApiErrorBody { code: string; message: string; details?: unknown; retryable: boolean; requestId?: string; }
-const statusForCode = (code: string) => ({
-  VALIDATION_ERROR: 400,
-  AUTHENTICATION_ERROR: 401,
-  SIWE_INVALID_DOMAIN: 401,
-  SIWE_INVALID_CHAIN: 401,
-  SIWE_INVALID_NONCE: 401,
-  SIWE_INVALID_SIGNATURE: 401,
-  SESSION_EXPIRED: 401,
-  REFRESH_TOKEN_REUSE: 401,
-  FORBIDDEN: 403,
-  NOT_FOUND: 404,
-  CONFLICT: 409,
-  RATE_LIMITED: 429,
-  DEPENDENCY_UNAVAILABLE: 503,
-}[code] ?? 500);
-const codeForStatus = (status: number): string => ({ 400: 'VALIDATION_ERROR', 401: 'AUTHENTICATION_ERROR', 403: 'FORBIDDEN', 404: 'NOT_FOUND', 409: 'CONFLICT', 429: 'RATE_LIMITED', 503: 'DEPENDENCY_UNAVAILABLE' }[status] ?? 'INTERNAL_ERROR');
-export function normalizeError(exception: unknown, requestId = currentRequestId()): { status: number; body: ApiErrorBody } { if (exception instanceof AppError) return { status: statusForCode(exception.code), body: { ...exception.toJSON(), ...(requestId ? { requestId } : {}) } }; if (exception instanceof HttpException) { const status = exception.getStatus(); const response = exception.getResponse(); const details = typeof response === 'string' ? undefined : response; return { status, body: { code: codeForStatus(status), message: exception.message, ...(details ? { details } : {}), retryable: status >= 500, ...(requestId ? { requestId } : {}) } }; } return { status: HttpStatus.INTERNAL_SERVER_ERROR, body: { code: ErrorCode.INTERNAL ?? 'INTERNAL_ERROR', message: 'Internal server error', retryable: false, ...(requestId ? { requestId } : {}) } }; }
-@Catch() export class GlobalErrorFilter implements ExceptionFilter { catch(exception: unknown, host: ArgumentsHost) { const normalized = normalizeError(exception); if (host.getType<'graphql'>() === 'graphql') { GqlArgumentsHost.create(host); throw new GraphQLError(normalized.body.message, { extensions: { ...normalized.body, http: { status: normalized.status } } }); } host.switchToHttp().getResponse().status(normalized.status).json(normalized.body); } }
+export interface ApiErrorBody {
+  code: string;
+  message: string;
+  details?: unknown;
+  retryable: boolean;
+  requestId?: string;
+}
+const statusForCode = (code: string) =>
+  ({
+    VALIDATION_ERROR: 400,
+    AUTHENTICATION_ERROR: 401,
+    SIWE_INVALID_DOMAIN: 401,
+    SIWE_INVALID_CHAIN: 401,
+    SIWE_INVALID_NONCE: 401,
+    SIWE_INVALID_SIGNATURE: 401,
+    SESSION_EXPIRED: 401,
+    REFRESH_TOKEN_REUSE: 401,
+    FORBIDDEN: 403,
+    NOT_FOUND: 404,
+    CONFLICT: 409,
+    RATE_LIMITED: 429,
+    DEPENDENCY_UNAVAILABLE: 503,
+  })[code] ?? 500;
+const codeForStatus = (status: number): string =>
+  ({
+    400: 'VALIDATION_ERROR',
+    401: 'AUTHENTICATION_ERROR',
+    403: 'FORBIDDEN',
+    404: 'NOT_FOUND',
+    409: 'CONFLICT',
+    429: 'RATE_LIMITED',
+    503: 'DEPENDENCY_UNAVAILABLE',
+  })[status] ?? 'INTERNAL_ERROR';
+export function normalizeError(
+  exception: unknown,
+  requestId = currentRequestId(),
+): { status: number; body: ApiErrorBody } {
+  if (exception instanceof AppError)
+    return {
+      status: statusForCode(exception.code),
+      body: { ...exception.toJSON(), ...(requestId ? { requestId } : {}) },
+    };
+  if (exception instanceof HttpException) {
+    const status = exception.getStatus();
+    const response = exception.getResponse();
+    const details = typeof response === 'string' ? undefined : response;
+    return {
+      status,
+      body: {
+        code: codeForStatus(status),
+        message: exception.message,
+        ...(details ? { details } : {}),
+        retryable: status >= 500,
+        ...(requestId ? { requestId } : {}),
+      },
+    };
+  }
+  return {
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    body: {
+      code: ErrorCode.INTERNAL ?? 'INTERNAL_ERROR',
+      message: 'Internal server error',
+      retryable: false,
+      ...(requestId ? { requestId } : {}),
+    },
+  };
+}
+@Catch()
+export class GlobalErrorFilter implements ExceptionFilter {
+  catch(exception: unknown, host: ArgumentsHost) {
+    const normalized = normalizeError(exception);
+    if (host.getType<'graphql'>() === 'graphql') {
+      GqlArgumentsHost.create(host);
+      throw new GraphQLError(normalized.body.message, {
+        extensions: { ...normalized.body, http: { status: normalized.status } },
+      });
+    }
+    host.switchToHttp().getResponse().status(normalized.status).json(normalized.body);
+  }
+}

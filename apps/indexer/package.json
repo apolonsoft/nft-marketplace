@@ -17,7 +17,8 @@
     "dev": "ponder dev",
     "build": "ponder codegen && ../../node_modules/.bin/tsc -p tsconfig.json --noEmit",
     "test": "../../node_modules/.bin/vitest run",
-    "lint": "../../node_modules/.bin/tsc -p tsconfig.json --noEmit",
+    "lint": "../../node_modules/.bin/eslint . --max-warnings=0",
+    "lint:fix": "../../node_modules/.bin/eslint . --fix",
     "typecheck": "../../node_modules/.bin/tsc -p tsconfig.json --noEmit",
     "generate": "ponder codegen",
     "docker": "node -e \"console.log('[indexer] placeholder: containerization belongs to T-060')\""
