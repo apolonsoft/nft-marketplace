@@ -1,0 +1,17 @@
+CREATE TYPE "ProfileField" AS ENUM ('DISPLAY_NAME', 'EMAIL', 'AVATAR', 'BIO');
+CREATE TYPE "ProfileVisibility" AS ENUM ('PRIVATE', 'APPLICATION_CONSENTED', 'PUBLIC');
+CREATE TYPE "ConsentGrantState" AS ENUM ('GRANTED', 'REVOKED');
+ALTER TABLE "WalletProfile" ADD COLUMN "displayNameCiphertext" TEXT, ADD COLUMN "emailCiphertext" TEXT, ADD COLUMN "avatarCiphertext" TEXT, ADD COLUMN "bioCiphertext" TEXT;
+CREATE TABLE "ProfilePrivacySetting" ("id" UUID NOT NULL, "walletId" UUID NOT NULL, "field" "ProfileField" NOT NULL, "visibility" "ProfileVisibility" NOT NULL DEFAULT 'PRIVATE', "updatedAt" TIMESTAMP(3) NOT NULL, CONSTRAINT "ProfilePrivacySetting_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "ConsentGrant" ("id" UUID NOT NULL, "walletId" UUID NOT NULL, "applicationId" UUID NOT NULL, "field" "ProfileField" NOT NULL, "purpose" VARCHAR(64) NOT NULL, "state" "ConsentGrantState" NOT NULL DEFAULT 'GRANTED', "policyVersion" VARCHAR(32) NOT NULL DEFAULT 'v1', "grantedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "revokedAt" TIMESTAMP(3), CONSTRAINT "ConsentGrant_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "PrivacyAudit" ("id" UUID NOT NULL, "walletId" UUID NOT NULL, "applicationId" UUID, "actorWalletId" UUID, "action" VARCHAR(64) NOT NULL, "field" VARCHAR(64), "purpose" VARCHAR(64), "result" VARCHAR(32) NOT NULL, "requestId" VARCHAR(128), "policyVersion" VARCHAR(32) NOT NULL DEFAULT 'v1', "metadata" JSONB, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "PrivacyAudit_pkey" PRIMARY KEY ("id"));
+CREATE UNIQUE INDEX "ProfilePrivacySetting_walletId_field_key" ON "ProfilePrivacySetting"("walletId", "field");
+CREATE UNIQUE INDEX "ConsentGrant_walletId_applicationId_field_purpose_key" ON "ConsentGrant"("walletId", "applicationId", "field", "purpose");
+CREATE INDEX "ConsentGrant_applicationId_walletId_state_idx" ON "ConsentGrant"("applicationId", "walletId", "state");
+CREATE INDEX "PrivacyAudit_walletId_createdAt_idx" ON "PrivacyAudit"("walletId", "createdAt");
+CREATE INDEX "PrivacyAudit_applicationId_createdAt_idx" ON "PrivacyAudit"("applicationId", "createdAt");
+ALTER TABLE "ProfilePrivacySetting" ADD CONSTRAINT "ProfilePrivacySetting_walletId_fkey" FOREIGN KEY ("walletId") REFERENCES "WalletProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ConsentGrant" ADD CONSTRAINT "ConsentGrant_walletId_fkey" FOREIGN KEY ("walletId") REFERENCES "WalletProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ConsentGrant" ADD CONSTRAINT "ConsentGrant_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "DeveloperApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "PrivacyAudit" ADD CONSTRAINT "PrivacyAudit_walletId_fkey" FOREIGN KEY ("walletId") REFERENCES "WalletProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "PrivacyAudit" ADD CONSTRAINT "PrivacyAudit_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "DeveloperApplication"("id") ON DELETE SET NULL ON UPDATE CASCADE;

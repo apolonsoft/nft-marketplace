@@ -14,6 +14,8 @@ export declare const ErrorCode: Readonly<Record<string, string> & {
   SESSION_EXPIRED: string;
   REFRESH_REUSE: string;
   SCOPE_DENIED: string;
+  CONSENT_REQUIRED: string;
+  PRIVACY_ERASURE_COMPLETE: string;
 }>;
 export declare class AppError extends Error {
   code: string;

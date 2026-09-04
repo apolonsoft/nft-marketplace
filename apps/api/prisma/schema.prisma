@@ -15,6 +15,13 @@ model WalletProfile {
   sessionFamilies SessionFamily[]
   ownedApplications DeveloperApplication[] @relation("ApplicationOwner")
   memberships ApplicationMember[]
+  displayNameCiphertext String?
+  emailCiphertext String?
+  avatarCiphertext String?
+  bioCiphertext String?
+  privacySettings ProfilePrivacySetting[]
+  consentGrants ConsentGrant[]
+  privacyAudits PrivacyAudit[]
 }
 
 model SiweNonce {
@@ -87,6 +94,8 @@ model DeveloperApplication {
   invitations    ApplicationInvitation[]
   apiKeys        ApiKey[]
   usage          ApiUsageDaily[]
+  consentGrants  ConsentGrant[]
+  privacyAudits  PrivacyAudit[]
 
   @@index([ownerWalletId, status])
 }
@@ -152,4 +161,65 @@ model ApiUsageDaily {
 
   @@unique([applicationId, keyId, day, endpointGroup, statusClass])
   @@index([applicationId, day])
+}
+
+enum ProfileField {
+  DISPLAY_NAME
+  EMAIL
+  AVATAR
+  BIO
+}
+enum ProfileVisibility {
+  PRIVATE
+  APPLICATION_CONSENTED
+  PUBLIC
+}
+enum ConsentGrantState {
+  GRANTED
+  REVOKED
+}
+
+model ProfilePrivacySetting {
+  id          String            @id @default(uuid()) @db.Uuid
+  walletId    String            @db.Uuid
+  field       ProfileField
+  visibility  ProfileVisibility @default(PRIVATE)
+  updatedAt   DateTime          @updatedAt
+  wallet      WalletProfile     @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  @@unique([walletId, field])
+}
+
+model ConsentGrant {
+  id            String           @id @default(uuid()) @db.Uuid
+  walletId      String           @db.Uuid
+  applicationId String           @db.Uuid
+  field         ProfileField
+  purpose       String           @db.VarChar(64)
+  state         ConsentGrantState @default(GRANTED)
+  policyVersion String           @default("v1") @db.VarChar(32)
+  grantedAt     DateTime         @default(now())
+  revokedAt     DateTime?
+  wallet        WalletProfile   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  application   DeveloperApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  @@unique([walletId, applicationId, field, purpose])
+  @@index([applicationId, walletId, state])
+}
+
+model PrivacyAudit {
+  id            String   @id @default(uuid()) @db.Uuid
+  walletId      String   @db.Uuid
+  applicationId String?  @db.Uuid
+  actorWalletId String?  @db.Uuid
+  action        String   @db.VarChar(64)
+  field         String?  @db.VarChar(64)
+  purpose       String?  @db.VarChar(64)
+  result        String   @db.VarChar(32)
+  requestId     String?  @db.VarChar(128)
+  policyVersion String   @default("v1") @db.VarChar(32)
+  metadata      Json?
+  createdAt     DateTime @default(now())
+  wallet        WalletProfile @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  application   DeveloperApplication? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  @@index([walletId, createdAt])
+  @@index([applicationId, createdAt])
 }
