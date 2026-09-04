@@ -1,3 +1,8 @@
 # @nft-marketplace/api
 
-Placeholder for the NestJS REST and GraphQL API. T-030 owns framework scaffolding. The API may consume shared packages and indexed data but must not import another application.
+NestJS REST and GraphQL API. Source is organized by feature under `src/config`,
+`src/health`, `src/observability`, and `src/system`, with cross-cutting code in
+`src/common`. Local imports are extensionless; `tsx` runs source development
+and `esbuild` produces the Node production bundle. See
+`../../docs/T-030-implementation-guide.md` for architecture, configuration,
+operational endpoints, and verification.
