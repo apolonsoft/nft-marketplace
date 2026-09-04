@@ -17,6 +17,7 @@ import { MarketplaceReadModule } from './marketplace-read/read.module';
 import { API_CONFIG } from './common/tokens';
 import { TransactionIntentModule } from './transaction-intents/intent.module';
 import { ModerationModule } from './moderation/moderation.module';
+import { WebhookModule } from './webhooks/webhook.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { ModerationModule } from './moderation/moderation.module';
     MarketplaceReadModule,
     TransactionIntentModule,
     ModerationModule,
+    WebhookModule,
     SystemModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: GlobalErrorFilter }],
