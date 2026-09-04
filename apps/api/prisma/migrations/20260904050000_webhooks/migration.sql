@@ -1,0 +1,15 @@
+CREATE TYPE "WebhookSubscriptionStatus" AS ENUM ('ACTIVE','DISABLED');
+CREATE TYPE "WebhookDeliveryStatus" AS ENUM ('PENDING','DELIVERED','RETRYING','FAILED','DEAD_LETTER');
+CREATE TABLE "WebhookSubscription" ("id" UUID NOT NULL, "applicationId" UUID NOT NULL, "endpointUrl" VARCHAR(2048) NOT NULL, "eventTypes" TEXT[] NOT NULL, "secretHash" CHAR(64) NOT NULL, "secretVersion" INTEGER NOT NULL DEFAULT 1, "status" "WebhookSubscriptionStatus" NOT NULL DEFAULT 'ACTIVE', "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL, "lastDeliveredAt" TIMESTAMP(3), CONSTRAINT "WebhookSubscription_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "WebhookDelivery" ("id" UUID NOT NULL, "subscriptionId" UUID NOT NULL, "eventId" VARCHAR(255) NOT NULL, "eventType" VARCHAR(64) NOT NULL, "payload" JSONB NOT NULL, "status" "WebhookDeliveryStatus" NOT NULL DEFAULT 'PENDING', "attemptCount" INTEGER NOT NULL DEFAULT 0, "nextAttemptAt" TIMESTAMP(3), "responseStatus" INTEGER, "errorMessage" VARCHAR(1000), "originalDeliveryId" UUID, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "deliveredAt" TIMESTAMP(3), "failedAt" TIMESTAMP(3), CONSTRAINT "WebhookDelivery_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "WebhookDeadLetter" ("id" UUID NOT NULL, "deliveryId" UUID NOT NULL, "reason" VARCHAR(1000) NOT NULL, "attemptCount" INTEGER NOT NULL, "replayedAt" TIMESTAMP(3), "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "WebhookDeadLetter_pkey" PRIMARY KEY ("id"));
+CREATE UNIQUE INDEX "WebhookDeadLetter_deliveryId_key" ON "WebhookDeadLetter"("deliveryId");
+CREATE UNIQUE INDEX "WebhookDelivery_subscriptionId_eventId_key" ON "WebhookDelivery"("subscriptionId","eventId");
+CREATE INDEX "WebhookSubscription_applicationId_status_idx" ON "WebhookSubscription"("applicationId","status");
+CREATE INDEX "WebhookDelivery_status_nextAttemptAt_idx" ON "WebhookDelivery"("status","nextAttemptAt");
+CREATE INDEX "WebhookDelivery_subscriptionId_createdAt_idx" ON "WebhookDelivery"("subscriptionId","createdAt");
+CREATE INDEX "WebhookDelivery_eventId_idx" ON "WebhookDelivery"("eventId");
+CREATE INDEX "WebhookDeadLetter_createdAt_idx" ON "WebhookDeadLetter"("createdAt");
+ALTER TABLE "WebhookSubscription" ADD CONSTRAINT "WebhookSubscription_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "DeveloperApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "WebhookDelivery" ADD CONSTRAINT "WebhookDelivery_subscriptionId_fkey" FOREIGN KEY ("subscriptionId") REFERENCES "WebhookSubscription"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "WebhookDeadLetter" ADD CONSTRAINT "WebhookDeadLetter_deliveryId_fkey" FOREIGN KEY ("deliveryId") REFERENCES "WebhookDelivery"("id") ON DELETE CASCADE ON UPDATE CASCADE;

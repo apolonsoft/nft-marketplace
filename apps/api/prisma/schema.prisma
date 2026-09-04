@@ -98,6 +98,7 @@ model DeveloperApplication {
   invitations    ApplicationInvitation[]
   apiKeys        ApiKey[]
   usage          ApiUsageDaily[]
+  webhookSubscriptions WebhookSubscription[]
   consentGrants  ConsentGrant[]
   privacyAudits  PrivacyAudit[]
 
@@ -357,4 +358,66 @@ model AdminAuditLog {
   @@index([actorWalletId, createdAt])
   @@index([targetType, targetId, createdAt])
   @@index([action, createdAt])
+}
+
+enum WebhookSubscriptionStatus {
+  ACTIVE
+  DISABLED
+}
+enum WebhookDeliveryStatus {
+  PENDING
+  DELIVERED
+  RETRYING
+  FAILED
+  DEAD_LETTER
+}
+
+model WebhookSubscription {
+  id String @id @default(uuid()) @db.Uuid
+  applicationId String @db.Uuid
+  endpointUrl String @db.VarChar(2048)
+  eventTypes String[]
+  secretHash String @db.Char(64)
+  secretVersion Int @default(1)
+  status WebhookSubscriptionStatus @default(ACTIVE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lastDeliveredAt DateTime?
+  application DeveloperApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  deliveries WebhookDelivery[]
+  @@index([applicationId, status])
+}
+
+model WebhookDelivery {
+  id String @id @default(uuid()) @db.Uuid
+  subscriptionId String @db.Uuid
+  eventId String @db.VarChar(255)
+  eventType String @db.VarChar(64)
+  payload Json
+  status WebhookDeliveryStatus @default(PENDING)
+  attemptCount Int @default(0)
+  nextAttemptAt DateTime?
+  responseStatus Int?
+  errorMessage String? @db.VarChar(1000)
+  originalDeliveryId String? @db.Uuid
+  createdAt DateTime @default(now())
+  deliveredAt DateTime?
+  failedAt DateTime?
+  subscription WebhookSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  deadLetter WebhookDeadLetter?
+  @@unique([subscriptionId, eventId])
+  @@index([status, nextAttemptAt])
+  @@index([subscriptionId, createdAt])
+  @@index([eventId])
+}
+
+model WebhookDeadLetter {
+  id String @id @default(uuid()) @db.Uuid
+  deliveryId String @unique @db.Uuid
+  reason String @db.VarChar(1000)
+  attemptCount Int
+  replayedAt DateTime?
+  createdAt DateTime @default(now())
+  delivery WebhookDelivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  @@index([createdAt])
 }
