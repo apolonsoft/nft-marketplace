@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { backoffMs, retryableStatus, webhookHeaders } from './webhook-delivery';
+import { backoffMs, retryableStatus, webhookHeaders } from './webhook-delivery.js';
 describe('webhook delivery', () => {
   it('creates identifiable signed headers', () => {
     const h = webhookHeaders(
