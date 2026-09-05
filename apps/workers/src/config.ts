@@ -27,6 +27,7 @@ export interface WorkerConfig {
   backoffBaseMs: number;
   backoffMaxMs: number;
   metricsPort: number;
+  media: { pinEndpoint: string; pinToken?: string; maxImageBytes: number; maxMetadataBytes: number; maxPixels: number; previewMaxDimension: number; sourceTimeoutMs: number; pollIntervalMs: number };
 }
 
 export const loadWorkerConfig = (source: NodeJS.ProcessEnv = process.env): WorkerConfig => {
@@ -43,6 +44,13 @@ export const loadWorkerConfig = (source: NodeJS.ProcessEnv = process.env): Worke
       WORKER_BACKOFF_BASE_MS: integer('WORKER_BACKOFF_BASE_MS', 1000),
       WORKER_BACKOFF_MAX_MS: integer('WORKER_BACKOFF_MAX_MS', 3_600_000),
       WORKER_METRICS_PORT: integer('WORKER_METRICS_PORT', 3020),
+      IPFS_PIN_ENDPOINT: optional(source.IPFS_PIN_ENDPOINT ?? 'http://127.0.0.1:8080/pins'),
+      MEDIA_MAX_IMAGE_BYTES: integer('MEDIA_MAX_IMAGE_BYTES', 10 * 1024 * 1024),
+      MEDIA_MAX_METADATA_BYTES: integer('MEDIA_MAX_METADATA_BYTES', 1024 * 1024),
+      MEDIA_MAX_PIXELS: integer('MEDIA_MAX_PIXELS', 25_000_000),
+      MEDIA_PREVIEW_MAX_DIMENSION: integer('MEDIA_PREVIEW_MAX_DIMENSION', 512),
+      MEDIA_SOURCE_TIMEOUT_MS: integer('MEDIA_SOURCE_TIMEOUT_MS', 30_000),
+      MEDIA_POLL_INTERVAL_MS: integer('MEDIA_POLL_INTERVAL_MS', 60_000),
     },
     source,
   );
@@ -57,5 +65,6 @@ export const loadWorkerConfig = (source: NodeJS.ProcessEnv = process.env): Worke
     backoffBaseMs: values.WORKER_BACKOFF_BASE_MS as number,
     backoffMaxMs: values.WORKER_BACKOFF_MAX_MS as number,
     metricsPort: values.WORKER_METRICS_PORT as number,
+    media: { pinEndpoint: values.IPFS_PIN_ENDPOINT as string, ...(source.IPFS_PIN_TOKEN ? { pinToken: source.IPFS_PIN_TOKEN } : {}), maxImageBytes: values.MEDIA_MAX_IMAGE_BYTES as number, maxMetadataBytes: values.MEDIA_MAX_METADATA_BYTES as number, maxPixels: values.MEDIA_MAX_PIXELS as number, previewMaxDimension: values.MEDIA_PREVIEW_MAX_DIMENSION as number, sourceTimeoutMs: values.MEDIA_SOURCE_TIMEOUT_MS as number, pollIntervalMs: values.MEDIA_POLL_INTERVAL_MS as number },
   };
 };

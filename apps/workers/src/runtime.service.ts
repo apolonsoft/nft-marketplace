@@ -4,9 +4,11 @@ import { Queue, Worker, type Job } from 'bullmq';
 import { createLogger } from '@nft-marketplace/observability';
 import { loadWorkerConfig, type WorkerConfig } from './config.js';
 import { backoffMs, deliver } from './webhook-delivery.js';
-import { defaultJobOptions, deadLetterQueue, QUEUES, webhookDeliveryJobSchema, domainEventJobSchema, type WebhookDeliveryJob } from './queues.js';
+import { defaultJobOptions, deadLetterQueue, QUEUES, MEDIA_QUEUES, webhookDeliveryJobSchema, domainEventJobSchema, mediaIngestJobSchema, type WebhookDeliveryJob } from './queues.js';
 import type { WorkerMetrics } from './metrics.js';
 import { EventStore } from './event-processing.js';
+import { MediaStore, IpfsPinningClient } from './media.js';
+import { Pool } from 'pg';
 
 @Injectable()
 export class WorkerRuntimeService implements OnModuleInit, OnModuleDestroy {
@@ -16,6 +18,8 @@ export class WorkerRuntimeService implements OnModuleInit, OnModuleDestroy {
   private readonly queues = new Map<string, Queue>();
   private readonly workers: Worker[] = [];
   private readonly eventStore = new EventStore(this.config.databaseUrl);
+  private readonly mediaStore = new MediaStore(new Pool({ connectionString: this.config.databaseUrl }));
+  private readonly ipfs = new IpfsPinningClient(this.config);
   private relayTimer?: ReturnType<typeof setInterval>;
 
   constructor(private readonly metrics: WorkerMetrics) {}
@@ -37,6 +41,19 @@ export class WorkerRuntimeService implements OnModuleInit, OnModuleDestroy {
     }, { connection: this.connection, concurrency: this.config.concurrency, settings: { backoffStrategy: (attemptsMade: number) => backoffMs(attemptsMade + 1, this.config.backoffBaseMs, this.config.backoffMaxMs) } });
     this.workers.push(eventWorker);
     await this.eventStore.migrate();
+    await this.mediaStore.migrate();
+    for (const queueName of Object.values(MEDIA_QUEUES)) this.queues.set(queueName, new Queue(queueName, { connection: this.connection, defaultJobOptions: defaultJobOptions(this.config) }));
+    for (const queueName of Object.values(MEDIA_QUEUES)) this.queues.set(deadLetterQueue(queueName), new Queue(deadLetterQueue(queueName), { connection: this.connection }));
+    const ingestQueue = this.queues.get(MEDIA_QUEUES.ingest)!;
+    const mediaWorker = new Worker(MEDIA_QUEUES.ingest, async (job) => {
+      const result = await this.mediaStore.ingest(job.data, this.config);
+      await this.queues.get(MEDIA_QUEUES.preview)!.add('preview', { assetId: result.job.assetId, body: result.body.toString('base64'), checksum: result.checksum }, { jobId: `${result.job.assetId}:preview` });
+      await this.queues.get(MEDIA_QUEUES.pin)!.add('pin', { assetId: result.job.assetId, body: result.body.toString('base64'), checksum: result.checksum }, { jobId: `${result.job.assetId}:pin` });
+    }, { connection: this.connection, concurrency: this.config.concurrency });
+    const previewWorker = new Worker(MEDIA_QUEUES.preview, async (job) => { const data = job.data as { assetId: string; body: string; checksum: string }; await this.mediaStore.preview(data.assetId, Buffer.from(data.body, 'base64'), data.checksum, this.config); }, { connection: this.connection, concurrency: this.config.concurrency });
+    const pinWorker = new Worker(MEDIA_QUEUES.pin, async (job) => { const data = job.data as { assetId: string; body: string; checksum: string }; const result = await this.ipfs.pin(Buffer.from(data.body, 'base64'), data.assetId); await this.mediaStore.status(data.assetId, { status: result.status === 'pinned' ? 'PINNED' : 'PINNING', provider_id: result.id ?? null, cid: result.cid ?? null, attempts: job.attemptsMade + 1 }); }, { connection: this.connection, concurrency: this.config.concurrency });
+    this.workers.push(mediaWorker, previewWorker, pinWorker);
+    void ingestQueue;
     this.relayTimer = setInterval(() => void this.relay(eventQueue), this.config.relayIntervalMs);
     this.metrics.ready.set(1);
     this.logger.info('Worker runtime started', { queues: [...this.queues.keys()], concurrency: this.config.concurrency });
@@ -83,5 +100,6 @@ export class WorkerRuntimeService implements OnModuleInit, OnModuleDestroy {
     await Promise.all(this.workers.map((worker) => worker.close()));
     await Promise.all([...this.queues.values()].map((queue) => queue.close()));
     await this.eventStore.close();
+    await this.mediaStore.close();
   }
 }
