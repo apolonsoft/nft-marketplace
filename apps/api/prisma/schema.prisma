@@ -231,6 +231,7 @@ model PrivacyAudit {
 
 enum IntentOperation {
   DEPLOY_COLLECTION
+  FREEZE_COLLECTION
   MINT
   MINT_BATCH
   APPROVE

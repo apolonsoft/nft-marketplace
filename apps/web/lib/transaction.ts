@@ -8,7 +8,9 @@ export function useTransactionController() {
   const [state, setState] = useState<TransactionStateValue>(TransactionState.INTENT);
   const [error, setError] = useState<string>();
   const [hash, setHash] = useState<string>();
+  const [lastOperation, setLastOperation] = useState<(() => Promise<{ hash?: string }>)>();
   const run = useCallback(async (operation: () => Promise<{ hash?: string }>) => {
+    setLastOperation(() => operation);
     setError(undefined);
     setState(TransactionState.PENDING);
     try {
@@ -27,6 +29,7 @@ export function useTransactionController() {
     error,
     hash,
     run,
+    retry: () => (lastOperation ? run(lastOperation) : Promise.resolve({})),
     confirm: () => setState(TransactionState.CONFIRMED),
     expire: () => setState(TransactionState.EXPIRED),
     reset: () => setState(TransactionState.INTENT),

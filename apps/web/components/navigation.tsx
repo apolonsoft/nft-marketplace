@@ -7,6 +7,7 @@ const links = [
   ['Collections', '/collections'],
   ['Creators', '/creators'],
   ['Activity', '/activity'],
+  ['Create', '/create'],
 ] as const;
 export function Navigation() {
   const [open, setOpen] = useState(false);

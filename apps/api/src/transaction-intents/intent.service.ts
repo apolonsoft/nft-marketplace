@@ -45,7 +45,7 @@ export class TransactionIntentService {
     const abi: any =
       input.operation === 'DEPLOY_COLLECTION'
         ? CreatorCollectionFactoryAbi
-        : ['MINT', 'MINT_BATCH', 'APPROVE', 'SET_APPROVAL_FOR_ALL'].includes(input.operation)
+        : ['MINT', 'MINT_BATCH', 'APPROVE', 'SET_APPROVAL_FOR_ALL', 'FREEZE_COLLECTION'].includes(input.operation)
           ? p.standard === 1155
             ? CreatorERC1155Abi
             : CreatorERC721Abi
@@ -60,7 +60,9 @@ export class TransactionIntentService {
             p.royaltyBps ?? 0,
             p.salt ?? `0x${'00'.repeat(32)}`,
           ]
-        : input.operation === 'MINT'
+        : input.operation === 'FREEZE_COLLECTION'
+          ? []
+          : input.operation === 'MINT'
           ? p.standard === 1155
             ? [p.to ?? wallet, BigInt(p.tokenId), BigInt(p.quantity ?? 1), p.tokenURI ?? '']
             : [p.to ?? wallet, BigInt(p.tokenId), p.tokenURI ?? '']
@@ -105,6 +107,7 @@ export class TransactionIntentService {
     const fn = (
       {
         DEPLOY_COLLECTION: 'deployCollection',
+        FREEZE_COLLECTION: 'freezeCollection',
         MINT: 'mint',
         MINT_BATCH: 'mintBatch',
         APPROVE: 'approve',
