@@ -11,6 +11,7 @@ import {
   MarketplaceSettlementAbi,
   addressOf,
 } from '@nft-marketplace/contracts';
+import { erc20Abi } from 'viem';
 import type { AccessPrincipal } from '../identity/auth.types';
 import type { IntentInput, IntentResponse, IntentOperation } from './intent.types';
 import { PrismaIntentRepository } from './prisma-intent.repository';
@@ -45,11 +46,15 @@ export class TransactionIntentService {
     const abi: any =
       input.operation === 'DEPLOY_COLLECTION'
         ? CreatorCollectionFactoryAbi
-        : ['MINT', 'MINT_BATCH', 'APPROVE', 'SET_APPROVAL_FOR_ALL', 'FREEZE_COLLECTION'].includes(input.operation)
+        : ['MINT', 'MINT_BATCH', 'APPROVE', 'SET_APPROVAL_FOR_ALL', 'FREEZE_COLLECTION'].includes(
+              input.operation,
+            )
           ? p.standard === 1155
             ? CreatorERC1155Abi
             : CreatorERC721Abi
-          : MarketplaceSettlementAbi;
+          : input.operation === 'APPROVE_CURRENCY'
+            ? erc20Abi
+            : MarketplaceSettlementAbi;
     const args: any =
       input.operation === 'DEPLOY_COLLECTION'
         ? [
@@ -60,50 +65,53 @@ export class TransactionIntentService {
             p.royaltyBps ?? 0,
             p.salt ?? `0x${'00'.repeat(32)}`,
           ]
-        : input.operation === 'FREEZE_COLLECTION'
-          ? []
-          : input.operation === 'MINT'
-          ? p.standard === 1155
-            ? [p.to ?? wallet, BigInt(p.tokenId), BigInt(p.quantity ?? 1), p.tokenURI ?? '']
-            : [p.to ?? wallet, BigInt(p.tokenId), p.tokenURI ?? '']
-          : input.operation === 'MINT_BATCH'
-            ? p.standard === 1155
-              ? [
-                  p.to ?? wallet,
-                  p.tokenIds.map((x: string) => BigInt(x)),
-                  p.quantities.map((x: string) => BigInt(x)),
-                  p.tokenURIs,
-                ]
-              : [p.to ?? wallet, p.tokenIds.map((x: string) => BigInt(x)), p.tokenURIs]
-            : input.operation === 'APPROVE'
-              ? [
-                  p.operator ?? this.target(input.chainId, 'MarketplaceSettlement', p.operator),
-                  BigInt(p.tokenId),
-                ]
-              : input.operation === 'SET_APPROVAL_FOR_ALL'
-                ? [
-                    p.operator ?? this.target(input.chainId, 'MarketplaceSettlement', p.operator),
-                    Boolean(p.approved ?? true),
-                  ]
-                : input.operation === 'CREATE_LISTING'
+        : input.operation === 'APPROVE_CURRENCY'
+          ? [this.target(input.chainId, 'MarketplaceSettlement', p.spender), BigInt(p.amount)]
+          : input.operation === 'FREEZE_COLLECTION'
+            ? []
+            : input.operation === 'MINT'
+              ? p.standard === 1155
+                ? [p.to ?? wallet, BigInt(p.tokenId), BigInt(p.quantity ?? 1), p.tokenURI ?? '']
+                : [p.to ?? wallet, BigInt(p.tokenId), p.tokenURI ?? '']
+              : input.operation === 'MINT_BATCH'
+                ? p.standard === 1155
                   ? [
-                      p.collection,
-                      BigInt(p.tokenId),
-                      p.standard ?? 0,
-                      BigInt(p.quantity),
-                      BigInt(p.unitPrice),
-                      p.currency,
-                      BigInt(p.expiresAt),
+                      p.to ?? wallet,
+                      p.tokenIds.map((x: string) => BigInt(x)),
+                      p.quantities.map((x: string) => BigInt(x)),
+                      p.tokenURIs,
                     ]
-                  : input.operation === 'PURCHASE'
+                  : [p.to ?? wallet, p.tokenIds.map((x: string) => BigInt(x)), p.tokenURIs]
+                : input.operation === 'APPROVE'
+                  ? [
+                      p.operator ?? this.target(input.chainId, 'MarketplaceSettlement', p.operator),
+                      BigInt(p.tokenId),
+                    ]
+                  : input.operation === 'SET_APPROVAL_FOR_ALL'
                     ? [
-                        BigInt(p.listingId),
-                        p.purchaseId ?? `0x${'00'.repeat(32)}`,
-                        BigInt(p.quantity ?? 1),
+                        p.operator ??
+                          this.target(input.chainId, 'MarketplaceSettlement', p.operator),
+                        Boolean(p.approved ?? true),
                       ]
-                    : input.operation === 'CANCEL_LISTING'
-                      ? [BigInt(p.listingId)]
-                      : [p.currency];
+                    : input.operation === 'CREATE_LISTING'
+                      ? [
+                          p.collection,
+                          BigInt(p.tokenId),
+                          p.standard ?? 0,
+                          BigInt(p.quantity),
+                          BigInt(p.unitPrice),
+                          p.currency,
+                          BigInt(p.expiresAt),
+                        ]
+                      : input.operation === 'PURCHASE'
+                        ? [
+                            BigInt(p.listingId),
+                            p.purchaseId ?? `0x${'00'.repeat(32)}`,
+                            BigInt(p.quantity ?? 1),
+                          ]
+                        : input.operation === 'CANCEL_LISTING'
+                          ? [BigInt(p.listingId)]
+                          : [p.currency];
     const fn = (
       {
         DEPLOY_COLLECTION: 'deployCollection',
@@ -116,6 +124,7 @@ export class TransactionIntentService {
         PURCHASE: 'purchase',
         CANCEL_LISTING: 'cancelListing',
         WITHDRAW: 'withdraw',
+        APPROVE_CURRENCY: 'approve',
       } as Record<IntentOperation, string>
     )[input.operation];
     try {

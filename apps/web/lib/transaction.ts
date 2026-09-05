@@ -8,7 +8,7 @@ export function useTransactionController() {
   const [state, setState] = useState<TransactionStateValue>(TransactionState.INTENT);
   const [error, setError] = useState<string>();
   const [hash, setHash] = useState<string>();
-  const [lastOperation, setLastOperation] = useState<(() => Promise<{ hash?: string }>)>();
+  const [lastOperation, setLastOperation] = useState<() => Promise<{ hash?: string }>>();
   const run = useCallback(async (operation: () => Promise<{ hash?: string }>) => {
     setLastOperation(() => operation);
     setError(undefined);

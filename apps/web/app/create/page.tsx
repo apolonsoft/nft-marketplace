@@ -1,2 +1,4 @@
 import { CreatorWorkspace } from '../../components/creator-workspace';
-export default function CreatePage() { return <CreatorWorkspace />; }
+export default function CreatePage() {
+  return <CreatorWorkspace />;
+}
