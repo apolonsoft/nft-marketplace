@@ -29,6 +29,10 @@ yarn generate
 yarn docker
 yarn workspaces:list
 yarn local:up
+yarn local:dev
+yarn local:dev:watch
+yarn local:dev:down
+yarn local:dev:logs
 yarn local:down
 yarn local:logs
 yarn local:migrate
@@ -43,6 +47,15 @@ with `yarn local:migrate`, load deterministic fixtures with `yarn local:seed`, a
 use `yarn local:reset` to remove local volumes, recreate the stack, migrate, and seed
 from a clean state. `yarn local:down` stops the stack while preserving volumes, and
 `yarn local:logs` follows service logs.
+
+For hot reload, use `yarn local:dev`. It runs web, API, workers, and indexer from a
+development image with the repository mounted into the containers; edits to apps and
+shared packages are picked up by their native watchers. Use `yarn local:dev:watch`
+to let Docker Compose rebuild affected containers when `package.json` or `yarn.lock`
+changes. Stop and inspect this stack with `yarn local:dev:down` and
+`yarn local:dev:logs`. Contract changes require explicit artifact generation,
+Anvil redeployment, and an indexer/data reset; they are not silently applied to a
+running chain.
 
 See [the local Compose implementation guide](docs/T-061-implementation-guide.md)
 for service ports, environment overrides, deterministic Anvil accounts, and
