@@ -4,8 +4,9 @@ import { Queue, Worker, type Job } from 'bullmq';
 import { createLogger } from '@nft-marketplace/observability';
 import { loadWorkerConfig, type WorkerConfig } from './config.js';
 import { backoffMs, deliver } from './webhook-delivery.js';
-import { defaultJobOptions, deadLetterQueue, QUEUES, webhookDeliveryJobSchema, type WebhookDeliveryJob } from './queues.js';
+import { defaultJobOptions, deadLetterQueue, QUEUES, webhookDeliveryJobSchema, domainEventJobSchema, type WebhookDeliveryJob } from './queues.js';
 import type { WorkerMetrics } from './metrics.js';
+import { EventStore } from './event-processing.js';
 
 @Injectable()
 export class WorkerRuntimeService implements OnModuleInit, OnModuleDestroy {
@@ -14,6 +15,8 @@ export class WorkerRuntimeService implements OnModuleInit, OnModuleDestroy {
   private readonly connection = { url: this.config.redisUrl, maxRetriesPerRequest: null as null };
   private readonly queues = new Map<string, Queue>();
   private readonly workers: Worker[] = [];
+  private readonly eventStore = new EventStore(this.config.databaseUrl);
+  private relayTimer?: ReturnType<typeof setInterval>;
 
   constructor(private readonly metrics: WorkerMetrics) {}
 
@@ -27,8 +30,26 @@ export class WorkerRuntimeService implements OnModuleInit, OnModuleDestroy {
     worker.on('failed', (job, error) => void this.onFailed(job, error));
     worker.on('error', (error) => this.logger.error('Worker error', { error: error.message }));
     this.workers.push(worker);
+    const eventQueue = new Queue(QUEUES.events, { connection: this.connection, defaultJobOptions: defaultJobOptions(this.config) });
+    this.queues.set(QUEUES.events, eventQueue).set(deadLetterQueue(QUEUES.events), new Queue(deadLetterQueue(QUEUES.events), { connection: this.connection }));
+    const eventWorker = new Worker(QUEUES.events, async (job) => {
+      const outcome = await this.eventStore.process(job.data, { duplicate: () => this.metrics.events.inc({ outcome: 'duplicate' }), stale: () => this.metrics.events.inc({ outcome: 'stale' }), processed: () => this.metrics.events.inc({ outcome: 'processed' }) });
+    }, { connection: this.connection, concurrency: this.config.concurrency, settings: { backoffStrategy: (attemptsMade: number) => backoffMs(attemptsMade + 1, this.config.backoffBaseMs, this.config.backoffMaxMs) } });
+    this.workers.push(eventWorker);
+    await this.eventStore.migrate();
+    this.relayTimer = setInterval(() => void this.relay(eventQueue), this.config.relayIntervalMs);
     this.metrics.ready.set(1);
     this.logger.info('Worker runtime started', { queues: [...this.queues.keys()], concurrency: this.config.concurrency });
+  }
+
+  private async relay(queue: Queue) {
+    const result = await this.eventStore.pool.query('SELECT id,event_type,payload_version,payload,deduplication_key,chain_id,block_number,block_hash,transaction_hash,log_index FROM event_outbox WHERE published_at IS NULL ORDER BY block_number,log_index LIMIT $1', [this.config.relayBatchSize]);
+    for (const row of result.rows) {
+      const payload = typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload;
+      const event = domainEventJobSchema.parse({ eventId: row.id, eventType: row.event_type, payloadVersion: row.payload_version, payload, deduplicationKey: row.deduplication_key, chainId: row.chain_id, blockNumber: String(row.block_number), blockHash: row.block_hash, transactionHash: row.transaction_hash, logIndex: row.log_index });
+      await queue.add(event.eventType, event, { jobId: event.deduplicationKey });
+      await this.eventStore.pool.query('UPDATE event_outbox SET published_at=$1 WHERE id=$2 AND published_at IS NULL', [Date.now(), row.id]);
+    }
   }
 
   private async processWebhook(job: Job): Promise<void> {
@@ -57,8 +78,10 @@ export class WorkerRuntimeService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleDestroy() {
+    if (this.relayTimer) clearInterval(this.relayTimer);
     this.metrics.ready.set(0);
     await Promise.all(this.workers.map((worker) => worker.close()));
     await Promise.all([...this.queues.values()].map((queue) => queue.close()));
+    await this.eventStore.close();
   }
 }
