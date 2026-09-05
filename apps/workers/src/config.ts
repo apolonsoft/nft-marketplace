@@ -19,6 +19,9 @@ const integer = (name: string, fallback: number) => (value: string | undefined) 
 export interface WorkerConfig {
   nodeEnv: string;
   redisUrl: string;
+  databaseUrl: string;
+  relayIntervalMs: number;
+  relayBatchSize: number;
   concurrency: number;
   attempts: number;
   backoffBaseMs: number;
@@ -32,6 +35,9 @@ export const loadWorkerConfig = (source: NodeJS.ProcessEnv = process.env): Worke
   const values = parseEnv(
     {
       REDIS_URL: nodeEnv === 'production' ? required('REDIS_URL') : optional(redisUrl),
+      DATABASE_URL: nodeEnv === 'production' ? required('DATABASE_URL') : optional(source.DATABASE_URL ?? 'postgresql://localhost:5432/nft_marketplace'),
+      WORKER_RELAY_INTERVAL_MS: integer('WORKER_RELAY_INTERVAL_MS', 1000),
+      WORKER_RELAY_BATCH_SIZE: integer('WORKER_RELAY_BATCH_SIZE', 100),
       WORKER_CONCURRENCY: integer('WORKER_CONCURRENCY', 10),
       WORKER_ATTEMPTS: integer('WORKER_ATTEMPTS', 5),
       WORKER_BACKOFF_BASE_MS: integer('WORKER_BACKOFF_BASE_MS', 1000),
@@ -43,6 +49,9 @@ export const loadWorkerConfig = (source: NodeJS.ProcessEnv = process.env): Worke
   return {
     nodeEnv,
     redisUrl: values.REDIS_URL as string,
+    databaseUrl: values.DATABASE_URL as string,
+    relayIntervalMs: values.WORKER_RELAY_INTERVAL_MS as number,
+    relayBatchSize: values.WORKER_RELAY_BATCH_SIZE as number,
     concurrency: values.WORKER_CONCURRENCY as number,
     attempts: values.WORKER_ATTEMPTS as number,
     backoffBaseMs: values.WORKER_BACKOFF_BASE_MS as number,
