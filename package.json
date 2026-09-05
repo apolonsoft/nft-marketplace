@@ -28,6 +28,8 @@
     "local:migrate": "node tooling/scripts/local-compose.mjs migrate",
     "local:seed": "node tooling/scripts/local-compose.mjs seed",
     "local:reset": "node tooling/scripts/local-compose.mjs reset",
+    "deploy:validate": "node infra/deploy/validate-env.mjs",
+    "deploy:prod": "sh infra/deploy/deploy.sh",
     "affected": "node tooling/scripts/affected.mjs",
     "format": "node tooling/scripts/format-check.mjs --write",
     "format:check": "node tooling/scripts/format-check.mjs --check",
