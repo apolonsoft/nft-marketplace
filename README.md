@@ -28,9 +28,25 @@ yarn typecheck
 yarn generate
 yarn docker
 yarn workspaces:list
+yarn local:up
+yarn local:down
+yarn local:logs
+yarn local:migrate
+yarn local:seed
+yarn local:reset
 ```
 
-T-001 supplies explicit placeholder tasks. Later implementation tasks replace them with framework-specific commands.
+The `local:*` commands manage the complete Docker Compose development stack. Use
+`yarn local:up` to build and start PostgreSQL, Redis, Kubo, Anvil, the contract
+deployment step, Traefik, web, API, workers, and indexer. Apply database migrations
+with `yarn local:migrate`, load deterministic fixtures with `yarn local:seed`, and
+use `yarn local:reset` to remove local volumes, recreate the stack, migrate, and seed
+from a clean state. `yarn local:down` stops the stack while preserving volumes, and
+`yarn local:logs` follows service logs.
+
+See [the local Compose implementation guide](docs/T-061-implementation-guide.md)
+for service ports, environment overrides, deterministic Anvil accounts, and
+troubleshooting.
 
 ## Repository Layout
 
