@@ -1,0 +1,42 @@
+services:
+  gateway:
+    image: traefik:v3.3
+    command: ['--configFile=/etc/traefik/traefik.yml']
+    ports: ['80:80', '443:443']
+    volumes: ['/var/run/docker.sock:/var/run/docker.sock:ro', 'letsencrypt:/letsencrypt', '../gateway/traefik.yml:/etc/traefik/traefik.yml:ro']
+    restart: unless-stopped
+  web:
+    image: ${WEB_IMAGE:?WEB_IMAGE is required}
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: "${PUBLIC_API_URL}"
+    restart: unless-stopped
+    labels:
+      traefik.enable: 'true'
+      traefik.http.routers.web.rule: "Host(`${DOMAIN}`)"
+      traefik.http.routers.web.entrypoints: websecure
+      traefik.http.routers.web.tls.certresolver: letsencrypt
+      traefik.http.services.web.loadbalancer.server.port: '3000'
+  api:
+    image: ${API_IMAGE:?API_IMAGE is required}
+    env_file:
+      - path: /etc/nft-marketplace/production.env
+        required: false
+    restart: unless-stopped
+    labels:
+      traefik.enable: 'true'
+      traefik.http.routers.api.rule: "Host(`${DOMAIN}`) && PathPrefix(`/api`)"
+      traefik.http.routers.api.entrypoints: websecure
+      traefik.http.routers.api.tls.certresolver: letsencrypt
+      traefik.http.services.api.loadbalancer.server.port: '3001'
+  workers:
+    image: ${WORKERS_IMAGE:?WORKERS_IMAGE is required}
+    env_file:
+      - path: /etc/nft-marketplace/production.env
+        required: false
+    restart: unless-stopped
+  indexer:
+    image: ${INDEXER_IMAGE:?INDEXER_IMAGE is required}
+    env_file: [/etc/nft-marketplace/production.env]
+    restart: unless-stopped
+volumes:
+  letsencrypt:

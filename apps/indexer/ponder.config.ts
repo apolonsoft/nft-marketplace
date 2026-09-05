@@ -11,10 +11,10 @@ import {
 const network = process.env.PONDER_NETWORK === 'base-sepolia' ? 'baseSepolia' : 'anvil';
 const manifestKey = network === 'baseSepolia' ? 'base-sepolia' : 'anvil';
 const manifest = networkManifests[manifestKey];
-const rpcUrl =
-  network === 'baseSepolia'
-    ? process.env.BASE_SEPOLIA_RPC_URL
-    : (process.env.ANVIL_RPC_URL ?? 'http://127.0.0.1:8545');
+const rpcCandidates = network === 'baseSepolia'
+  ? [process.env.BASE_SEPOLIA_RPC_URL_PRIMARY, process.env.BASE_SEPOLIA_RPC_URL_SECONDARY, process.env.BASE_SEPOLIA_RPC_URL].filter(Boolean) as string[]
+  : [process.env.ANVIL_RPC_URL ?? 'http://127.0.0.1:8545'];
+const rpcUrl = rpcCandidates[0];
 if (network === 'baseSepolia' && !rpcUrl) throw new Error('BASE_SEPOLIA_RPC_URL is required');
 const startBlock = Number(process.env.PONDER_START_BLOCK ?? 0);
 const factory = (process.env.FACTORY_ADDRESS ??
