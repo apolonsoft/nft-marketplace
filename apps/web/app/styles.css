@@ -213,6 +213,14 @@ a {
   margin-top: 24px;
   color: #625f59;
 }
+.creator-workspace { max-width: 980px; margin: 0 auto; }
+.creator-steps { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0; }
+.creator-steps [aria-selected='true'] { background: var(--ink); color: white; }
+.creator-form { display: grid; gap: 16px; max-width: 620px; }
+.creator-form label { display: grid; gap: 7px; font-weight: 700; }
+.creator-form input, .creator-form select, .creator-form textarea { width: 100%; border: 1px solid var(--line); background: white; padding: 11px; font: inherit; }
+.creator-form button { justify-self: start; }
+.creator-workspace .state-panel { margin-top: 32px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .error-panel {
   color: #9f261a;
 }

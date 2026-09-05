@@ -2,6 +2,7 @@ import type { Address, Hex } from 'viem';
 
 export type IntentOperation =
   | 'DEPLOY_COLLECTION'
+  | 'FREEZE_COLLECTION'
   | 'MINT'
   | 'MINT_BATCH'
   | 'APPROVE'
