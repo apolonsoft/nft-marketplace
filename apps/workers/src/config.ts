@@ -1,18 +1,29 @@
-const parseEnv = (schema: Record<string, (value: string | undefined) => unknown>, source: NodeJS.ProcessEnv) => {
+const parseEnv = (
+  schema: Record<string, (value: string | undefined) => unknown>,
+  source: NodeJS.ProcessEnv,
+) => {
   const result: Record<string, unknown> = {};
   const errors: string[] = [];
   for (const [key, validate] of Object.entries(schema)) {
-    try { result[key] = validate(source[key]); } catch (error) { errors.push(`${key}: ${error instanceof Error ? error.message : String(error)}`); }
+    try {
+      result[key] = validate(source[key]);
+    } catch (error) {
+      errors.push(`${key}: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
   if (errors.length) throw new Error(`Invalid environment:\n${errors.join('\n')}`);
   return result;
 };
 const optional = (fallback?: string) => (value: string | undefined) => value ?? fallback;
-const required = (name: string) => (value: string | undefined) => { if (!value) throw new Error(`${name} is required`); return value; };
+const required = (name: string) => (value: string | undefined) => {
+  if (!value) throw new Error(`${name} is required`);
+  return value;
+};
 
 const integer = (name: string, fallback: number) => (value: string | undefined) => {
   const parsed = Number(value ?? fallback);
-  if (!Number.isInteger(parsed) || parsed <= 0) throw new Error(`${name} must be a positive integer`);
+  if (!Number.isInteger(parsed) || parsed <= 0)
+    throw new Error(`${name} must be a positive integer`);
   return parsed;
 };
 
@@ -27,16 +38,29 @@ export interface WorkerConfig {
   backoffBaseMs: number;
   backoffMaxMs: number;
   metricsPort: number;
-  media: { pinEndpoint: string; pinToken?: string; maxImageBytes: number; maxMetadataBytes: number; maxPixels: number; previewMaxDimension: number; sourceTimeoutMs: number; pollIntervalMs: number };
+  media: {
+    pinEndpoint: string;
+    pinToken?: string;
+    maxImageBytes: number;
+    maxMetadataBytes: number;
+    maxPixels: number;
+    previewMaxDimension: number;
+    sourceTimeoutMs: number;
+    pollIntervalMs: number;
+  };
 }
 
 export const loadWorkerConfig = (source: NodeJS.ProcessEnv = process.env): WorkerConfig => {
   const nodeEnv = source.NODE_ENV ?? 'development';
-  const redisUrl = source.REDIS_URL ?? (nodeEnv === 'production' ? undefined : 'redis://127.0.0.1:6379');
+  const redisUrl =
+    source.REDIS_URL ?? (nodeEnv === 'production' ? undefined : 'redis://127.0.0.1:6379');
   const values = parseEnv(
     {
       REDIS_URL: nodeEnv === 'production' ? required('REDIS_URL') : optional(redisUrl),
-      DATABASE_URL: nodeEnv === 'production' ? required('DATABASE_URL') : optional(source.DATABASE_URL ?? 'postgresql://localhost:5432/nft_marketplace'),
+      DATABASE_URL:
+        nodeEnv === 'production'
+          ? required('DATABASE_URL')
+          : optional(source.DATABASE_URL ?? 'postgresql://localhost:5432/nft_marketplace'),
       WORKER_RELAY_INTERVAL_MS: integer('WORKER_RELAY_INTERVAL_MS', 1000),
       WORKER_RELAY_BATCH_SIZE: integer('WORKER_RELAY_BATCH_SIZE', 100),
       WORKER_CONCURRENCY: integer('WORKER_CONCURRENCY', 10),
@@ -65,6 +89,15 @@ export const loadWorkerConfig = (source: NodeJS.ProcessEnv = process.env): Worke
     backoffBaseMs: values.WORKER_BACKOFF_BASE_MS as number,
     backoffMaxMs: values.WORKER_BACKOFF_MAX_MS as number,
     metricsPort: values.WORKER_METRICS_PORT as number,
-    media: { pinEndpoint: values.IPFS_PIN_ENDPOINT as string, ...(source.IPFS_PIN_TOKEN ? { pinToken: source.IPFS_PIN_TOKEN } : {}), maxImageBytes: values.MEDIA_MAX_IMAGE_BYTES as number, maxMetadataBytes: values.MEDIA_MAX_METADATA_BYTES as number, maxPixels: values.MEDIA_MAX_PIXELS as number, previewMaxDimension: values.MEDIA_PREVIEW_MAX_DIMENSION as number, sourceTimeoutMs: values.MEDIA_SOURCE_TIMEOUT_MS as number, pollIntervalMs: values.MEDIA_POLL_INTERVAL_MS as number },
+    media: {
+      pinEndpoint: values.IPFS_PIN_ENDPOINT as string,
+      ...(source.IPFS_PIN_TOKEN ? { pinToken: source.IPFS_PIN_TOKEN } : {}),
+      maxImageBytes: values.MEDIA_MAX_IMAGE_BYTES as number,
+      maxMetadataBytes: values.MEDIA_MAX_METADATA_BYTES as number,
+      maxPixels: values.MEDIA_MAX_PIXELS as number,
+      previewMaxDimension: values.MEDIA_PREVIEW_MAX_DIMENSION as number,
+      sourceTimeoutMs: values.MEDIA_SOURCE_TIMEOUT_MS as number,
+      pollIntervalMs: values.MEDIA_POLL_INTERVAL_MS as number,
+    },
   };
 };

@@ -1,1 +1,18 @@
-{ "extends": "../../packages/config/tsconfig.browser.json", "include": ["**/*.ts", "**/*.tsx"] }
+{
+  "extends": "../../packages/config/tsconfig.browser.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowJs": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "incremental": true,
+    "esModuleInterop": true
+  },
+  "include": ["**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}

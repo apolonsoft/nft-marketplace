@@ -2,17 +2,25 @@
   "name": "@nft-marketplace/web",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@nft-marketplace/api-client": "workspace:*",
-    "@nft-marketplace/ui": "workspace:*"
+    "@nft-marketplace/contracts": "workspace:*",
+    "@nft-marketplace/ui": "workspace:*",
+    "@tanstack/react-query": "5.80.7",
+    "next": "15.5.6",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "viem": "2.37.3",
+    "wagmi": "2.16.5"
   },
   "scripts": {
-    "dev": "node -e \"console.log('[web] placeholder: implementation belongs to T-050')\"",
-    "build": "node -e \"console.log('[web] placeholder: implementation belongs to T-050')\"",
-    "test": "node -e \"console.log('[web] placeholder: tests belong to T-050 and T-070')\"",
-    "lint": "../../node_modules/.bin/eslint . --max-warnings=0 --no-error-on-unmatched-pattern",
+    "dev": "next dev",
+    "build": "next build",
+    "test": "../../node_modules/.bin/vitest run",
+    "lint": "../../node_modules/.bin/eslint . --max-warnings=0 --no-error-on-unmatched-pattern --ignore-pattern next-env.d.ts",
     "lint:fix": "../../node_modules/.bin/eslint . --fix --no-error-on-unmatched-pattern",
-    "typecheck": "node -e \"console.log('[web] placeholder: tooling belongs to T-003 and T-050')\"",
+    "typecheck": "next typegen && ../../node_modules/.bin/tsc --noEmit",
     "generate": "node -e \"console.log('[web] placeholder: generation belongs to later application tasks')\"",
     "docker": "node -e \"console.log('[web] placeholder: containerization belongs to T-060')\""
   }
