@@ -2,7 +2,7 @@ import { Gallery } from '../components/gallery';
 import { fetchExplore } from '../lib/api';
 
 export default async function HomePage() {
-  const result = await fetchExplore();
+  const result = await fetchExplore({ resource: 'nfts', first: 6 });
   return (
     <>
       <section className="editorial-hero">

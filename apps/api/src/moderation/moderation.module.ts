@@ -16,6 +16,6 @@ import { ModerationService } from './moderation.service';
     AdminGuard,
     { provide: 'MODERATION_REPOSITORY', useExisting: PrismaModerationRepository },
   ],
-  exports: [ModerationService, PrismaModerationRepository, AdminGuard],
+  exports: [ModerationService, PrismaModerationRepository, AdminGuard, 'MODERATION_REPOSITORY'],
 })
 export class ModerationModule {}

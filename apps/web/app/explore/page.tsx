@@ -1,20 +1,17 @@
 import { Gallery } from '../../components/gallery';
 import { fetchExplore } from '../../lib/api';
+import { DiscoveryControls } from '../../components/discovery-controls';
+import { Pagination } from '../../components/pagination';
 export default async function ExplorePage() {
-  const result = await fetchExplore();
+  const result = await fetchExplore({ resource: 'nfts', first: 24 });
   return (
     <section className="content-section">
       <p className="eyebrow">DISCOVER</p>
       <h1>Explore</h1>
       <p className="lede">Browse the latest listings and collections.</p>
-      <div className="filter-row">
-        <input aria-label="Search artwork" placeholder="Search artwork" />
-        <select aria-label="Sort results" defaultValue="recent">
-          <option value="recent">Recently added</option>
-          <option value="price">Price</option>
-        </select>
-      </div>
+      <DiscoveryControls />
       <Gallery items={result.items} />
+      <Pagination pageInfo={result.pageInfo} />
     </section>
   );
 }
