@@ -122,6 +122,45 @@ a {
 .art-card {
   min-width: 0;
 }
+.stale-card {
+  opacity: 0.72;
+}
+.unavailable-label {
+  color: var(--accent);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 40px;
+}
+.detail-tabs {
+  margin-top: 40px;
+}
+.tab-list {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--line);
+  overflow: auto;
+}
+.tab-button {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  padding: 12px 16px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tab-button[aria-selected='true'] {
+  border-bottom-color: var(--ink);
+  font-weight: 700;
+}
+.tab-panel {
+  padding: 24px 0;
+}
 .art-image {
   aspect-ratio: 4/5;
   background: #d9d7cf;

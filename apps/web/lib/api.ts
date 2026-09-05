@@ -1,4 +1,4 @@
-import { createApiClient } from '@nft-marketplace/api-client';
+import { createApiClient, marketplaceQuery } from '@nft-marketplace/api-client';
 import { z } from 'zod';
 import type { GalleryItem } from '../components/gallery';
 
@@ -13,21 +13,30 @@ const itemSchema = z
     price: z.string().optional(),
   })
   .passthrough();
-const responseSchema = z.object({ data: z.unknown().optional() }).passthrough();
-const query = `query Explore { search(query: "{}") }`;
+const responseSchema = z.object({
+  items: z.array(z.unknown()),
+  pageInfo: z.unknown(),
+  totalCount: z.number().optional(),
+});
 
-export async function fetchExplore(): Promise<{ items: GalleryItem[]; error?: string }> {
+export async function fetchExplore(
+  params: Record<string, string | number | boolean | undefined> = {},
+): Promise<{
+  items: GalleryItem[];
+  pageInfo?: {
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    startCursor: string | null;
+    endCursor: string | null;
+  };
+  totalCount?: number;
+  error?: string;
+}> {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://127.0.0.1:3001';
   const client = createApiClient({ baseUrl });
   try {
-    const response = await client.graphql(query, {}, responseSchema);
-    const raw = response.data as Record<string, unknown> | undefined;
-    const search = raw?.search;
-    const parsed = typeof search === 'string' ? (JSON.parse(search) as unknown) : search;
-    const source = Array.isArray(parsed)
-      ? parsed
-      : ((parsed as { data?: unknown[] } | undefined)?.data ?? []);
-    const items = z.array(itemSchema).safeParse(source);
+    const response = await client.get(marketplaceQuery('search', params), responseSchema);
+    const items = z.array(itemSchema).safeParse(response.items);
     return {
       items: items.success
         ? items.data.map((item) => ({
@@ -38,8 +47,22 @@ export async function fetchExplore(): Promise<{ items: GalleryItem[]; error?: st
               : {}),
             ...(item.creator ? { creator: item.creator } : {}),
             ...(item.price ? { price: item.price } : {}),
+            ...(typeof item.stale === 'boolean'
+              ? {
+                  stale: item.stale,
+                  unavailableReason:
+                    typeof item.unavailableReason === 'string' ? item.unavailableReason : null,
+                }
+              : {}),
           }))
         : [],
+      pageInfo: response.pageInfo as {
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+        startCursor: string | null;
+        endCursor: string | null;
+      },
+      ...(response.totalCount === undefined ? {} : { totalCount: response.totalCount }),
     };
   } catch (error) {
     return {
