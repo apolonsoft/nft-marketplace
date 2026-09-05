@@ -18,7 +18,8 @@ RUN groupadd --system app && useradd --system --gid app --create-home app
 COPY --from=build /workspace/node_modules ./node_modules
 COPY --from=build /workspace/apps/indexer/node_modules ./apps/indexer/node_modules
 COPY --from=build --chown=app:app /workspace/apps/indexer ./indexer
+COPY --from=build --chown=app:app /workspace/tooling/scripts/local-indexer-start.mjs ./local-indexer-start.mjs
 USER app
 EXPOSE 42069
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD node -e "process.exit(0)"
-CMD ["./node_modules/.bin/ponder", "start"]
+CMD ["node", "local-indexer-start.mjs"]
