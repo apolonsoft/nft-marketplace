@@ -299,6 +299,71 @@ a {
   padding: 14px 0;
   border-bottom: 1px solid var(--line);
 }
+.developer-portal {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.developer-toolbar,
+.developer-tabs,
+.developer-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 24px 0;
+}
+.developer-toolbar input,
+.developer-toolbar select,
+.developer-panel input,
+.developer-panel select {
+  border: 1px solid var(--line);
+  padding: 10px;
+  background: white;
+  font: inherit;
+}
+.developer-tabs {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 12px;
+}
+.developer-tabs [aria-current='page'] {
+  background: var(--ink);
+  color: white;
+}
+.developer-grid > div,
+.developer-panel {
+  flex: 1 1 320px;
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+}
+.developer-panel {
+  display: block;
+}
+.developer-panel ul {
+  list-style: none;
+  padding: 0;
+}
+.developer-panel li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.secret-panel {
+  margin-top: 24px;
+  padding: 18px;
+  border: 2px solid var(--accent);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.secret-panel code {
+  flex: 1 1 100%;
+  overflow-wrap: anywhere;
+  background: white;
+  padding: 10px;
+}
 @media (max-width: 640px) {
   .history-panel li {
     flex-direction: column;
