@@ -1,0 +1,32 @@
+services:
+  web:
+    build: { context: ../.., dockerfile: infra/docker/web.Dockerfile }
+    ports: ['3000:3000']
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://api:3001}
+    healthcheck: { test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"], interval: 30s, timeout: 5s, retries: 3 }
+  api:
+    build: { context: ../.., dockerfile: infra/docker/api.Dockerfile }
+    ports: ['3001:3001']
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      INDEXER_HEALTH_URL: ${INDEXER_HEALTH_URL:-http://indexer:42069/health}
+    healthcheck: { test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:3001/health/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"], interval: 30s, timeout: 5s, retries: 3 }
+    depends_on: [indexer]
+  workers:
+    build: { context: ../.., dockerfile: infra/docker/workers.Dockerfile }
+    ports: ['3020:3020']
+    environment:
+      REDIS_URL: ${REDIS_URL:?REDIS_URL is required}
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+    healthcheck: { test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:3020/metrics').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"], interval: 30s, timeout: 5s, retries: 3 }
+  indexer:
+    build: { context: ../.., dockerfile: infra/docker/indexer.Dockerfile }
+    ports: ['42069:42069']
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      BASE_SEPOLIA_RPC_URL: ${BASE_SEPOLIA_RPC_URL:-}
+      ANVIL_RPC_URL: ${ANVIL_RPC_URL:-http://host.docker.internal:8545}
+      PONDER_NETWORK: ${PONDER_NETWORK:-anvil}
+      PONDER_START_BLOCK: ${PONDER_START_BLOCK:-0}
+    healthcheck: { test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:42069/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"], interval: 30s, timeout: 5s, retries: 3 }

@@ -15,6 +15,7 @@
   },
   "scripts": {
     "dev": "ponder dev",
+    "start": "ponder start",
     "build": "ponder codegen && ../../node_modules/.bin/tsc -p tsconfig.json --noEmit",
     "test": "../../node_modules/.bin/vitest run",
     "lint": "../../node_modules/.bin/eslint . --max-warnings=0",
