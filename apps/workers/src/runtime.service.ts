@@ -108,28 +108,24 @@ export class WorkerRuntimeService implements OnModuleInit, OnModuleDestroy {
       MEDIA_QUEUES.ingest,
       async (job) => {
         const result = await this.mediaStore.ingest(job.data, this.config);
-        await this.queues
-          .get(MEDIA_QUEUES.preview)!
-          .add(
-            'preview',
-            {
-              assetId: result.job.assetId,
-              body: result.body.toString('base64'),
-              checksum: result.checksum,
-            },
-            { jobId: `${result.job.assetId}:preview` },
-          );
-        await this.queues
-          .get(MEDIA_QUEUES.pin)!
-          .add(
-            'pin',
-            {
-              assetId: result.job.assetId,
-              body: result.body.toString('base64'),
-              checksum: result.checksum,
-            },
-            { jobId: `${result.job.assetId}:pin` },
-          );
+        await this.queues.get(MEDIA_QUEUES.preview)!.add(
+          'preview',
+          {
+            assetId: result.job.assetId,
+            body: result.body.toString('base64'),
+            checksum: result.checksum,
+          },
+          { jobId: `${result.job.assetId}:preview` },
+        );
+        await this.queues.get(MEDIA_QUEUES.pin)!.add(
+          'pin',
+          {
+            assetId: result.job.assetId,
+            body: result.body.toString('base64'),
+            checksum: result.checksum,
+          },
+          { jobId: `${result.job.assetId}:pin` },
+        );
       },
       { connection: this.connection, concurrency: this.config.concurrency },
     );

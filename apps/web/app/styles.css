@@ -213,14 +213,97 @@ a {
   margin-top: 24px;
   color: #625f59;
 }
-.creator-workspace { max-width: 980px; margin: 0 auto; }
-.creator-steps { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0; }
-.creator-steps [aria-selected='true'] { background: var(--ink); color: white; }
-.creator-form { display: grid; gap: 16px; max-width: 620px; }
-.creator-form label { display: grid; gap: 7px; font-weight: 700; }
-.creator-form input, .creator-form select, .creator-form textarea { width: 100%; border: 1px solid var(--line); background: white; padding: 11px; font: inherit; }
-.creator-form button { justify-self: start; }
-.creator-workspace .state-panel { margin-top: 32px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.creator-workspace {
+  max-width: 980px;
+  margin: 0 auto;
+}
+.creator-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 28px 0;
+}
+.creator-steps [aria-selected='true'] {
+  background: var(--ink);
+  color: white;
+}
+.creator-form {
+  display: grid;
+  gap: 16px;
+  max-width: 620px;
+}
+.creator-form label {
+  display: grid;
+  gap: 7px;
+  font-weight: 700;
+}
+.creator-form input,
+.creator-form select,
+.creator-form textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: white;
+  padding: 11px;
+  font: inherit;
+}
+.creator-form button {
+  justify-self: start;
+}
+.creator-workspace .state-panel {
+  margin-top: 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.checkout-workspace {
+  max-width: 860px;
+  margin: 0 auto;
+}
+.checkout-summary {
+  max-width: 620px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 24px 0;
+}
+.checkout-summary label {
+  display: grid;
+  gap: 8px;
+  max-width: 180px;
+  font-weight: 700;
+}
+.checkout-summary input {
+  border: 1px solid var(--line);
+  padding: 10px;
+  font: inherit;
+}
+.checkout-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+.history-panel {
+  margin-top: 32px;
+  max-width: 760px;
+}
+.history-panel ul {
+  list-style: none;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+.history-panel li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+@media (max-width: 640px) {
+  .history-panel li {
+    flex-direction: column;
+  }
+}
 .error-panel {
   color: #9f261a;
 }

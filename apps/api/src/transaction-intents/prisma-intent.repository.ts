@@ -47,7 +47,7 @@ export class PrismaIntentRepository implements IntentRepository {
         data: {
           walletId,
           idempotencyKey: input.idempotencyKey,
-        operation: input.operation as any,
+          operation: input.operation as any,
           chainId: input.chainId,
           requestHash,
           to: response.to,

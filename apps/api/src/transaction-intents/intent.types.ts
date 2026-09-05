@@ -10,7 +10,8 @@ export type IntentOperation =
   | 'CREATE_LISTING'
   | 'PURCHASE'
   | 'CANCEL_LISTING'
-  | 'WITHDRAW';
+  | 'WITHDRAW'
+  | 'APPROVE_CURRENCY';
 export type IntentStatus =
   'CREATED' | 'SUBMITTED' | 'CONFIRMED' | 'FAILED' | 'EXPIRED' | 'CONSUMED';
 export interface IntentInput {
