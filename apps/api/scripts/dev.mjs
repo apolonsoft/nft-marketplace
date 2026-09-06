@@ -8,7 +8,7 @@ const initial = spawnSync('tsc', ['-p', 'tsconfig.dev.json'], {
 if (initial.status !== 0) process.exit(initial.status ?? 1);
 
 const compiler = run('tsc', ['-p', 'tsconfig.dev.json', '--watch', '--preserveWatchOutput']);
-const server = run('tsx', ['watch', 'dist-dev/main.js']);
+const server = run('tsx', ['watch', 'dist/main.js']);
 
 const shutdown = (signal) => {
   compiler.kill(signal);
