@@ -24,8 +24,8 @@ contract Deploy is Script {
         bool broadcast = vm.envOr("BROADCAST", false);
         if (broadcast) vm.startBroadcast(vm.envUint("DEPLOYER_PRIVATE_KEY"));
 
-        deployment.factoryImplementation = address(new CreatorCollectionFactory(address(this)));
-        deployment.settlementImplementation = address(new MarketplaceSettlement(address(this), treasury, feeBps));
+        deployment.factoryImplementation = address(new CreatorCollectionFactory(multisig));
+        deployment.settlementImplementation = address(new MarketplaceSettlement(multisig, treasury, feeBps));
         deployment.erc721Implementation = address(new CreatorERC721());
         deployment.erc1155Implementation = address(new CreatorERC1155());
 

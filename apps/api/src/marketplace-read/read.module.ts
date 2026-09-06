@@ -5,10 +5,11 @@ import { MarketplaceReadService } from './read.service';
 import { PostgresMarketplaceReadRepository } from './read.repository';
 import { GraphqlComplexityMiddleware } from './read.complexity';
 import { ModerationModule } from '../moderation/moderation.module';
+import { IdentityModule } from '../identity/identity.module';
 
 @Module({
   controllers: [MarketplaceReadController],
-  imports: [ModerationModule],
+  imports: [ModerationModule, IdentityModule],
   providers: [
     MarketplaceReadResolver,
     MarketplaceReadService,

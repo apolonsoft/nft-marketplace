@@ -1,1 +1,5 @@
-{ "extends": "../../packages/config/tsconfig.node.json", "include": ["**/*.ts"] }
+{
+  "extends": "../../packages/config/tsconfig.node.json",
+  "include": ["**/*.ts"],
+  "exclude": ["**/*.test.ts"]
+}

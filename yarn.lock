@@ -2803,6 +2803,8 @@ __metadata:
     "@nestjs/swagger": "npm:11.2.0"
     "@nestjs/testing": "npm:11.1.6"
     "@nft-marketplace/config": "workspace:*"
+    "@nft-marketplace/contracts": "workspace:*"
+    "@nft-marketplace/domain": "workspace:*"
     "@nft-marketplace/observability": "workspace:*"
     "@prisma/client": "npm:6.16.2"
     "@types/express": "npm:5.0.3"

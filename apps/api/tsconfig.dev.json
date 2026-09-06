@@ -1,7 +1,9 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "dist-tsc",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "outDir": "dist-dev",
     "rootDir": "src",
     "declaration": false,
     "declarationMap": false,

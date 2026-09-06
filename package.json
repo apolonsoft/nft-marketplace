@@ -5,7 +5,7 @@
   "type": "module",
   "packageManager": "yarn@4.18.0",
   "engines": {
-    "node": ">=24.12.0 <25",
+    "node": ">=24.15.0 <25",
     "yarn": "4.18.0"
   },
   "workspaces": [
@@ -23,15 +23,8 @@
     "generate:check": "node tooling/scripts/check-contract-artifacts.mjs",
     "docker": "turbo run docker",
     "local:up": "node tooling/scripts/local-compose.mjs up",
-    "local:dev": "node tooling/scripts/local-compose.mjs dev",
-    "local:dev:watch": "node tooling/scripts/local-compose.mjs dev:watch",
-    "local:dev:down": "node tooling/scripts/local-compose.mjs dev:down",
-    "local:dev:logs": "node tooling/scripts/local-compose.mjs dev:logs",
     "local:down": "node tooling/scripts/local-compose.mjs down",
     "local:logs": "node tooling/scripts/local-compose.mjs logs",
-    "local:migrate": "node tooling/scripts/local-compose.mjs migrate",
-    "local:seed": "node tooling/scripts/local-compose.mjs seed",
-    "local:reset": "node tooling/scripts/local-compose.mjs reset",
     "deploy:validate": "node infra/deploy/validate-env.mjs",
     "deploy:prod": "sh infra/deploy/deploy.sh",
     "affected": "node tooling/scripts/affected.mjs",

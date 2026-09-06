@@ -12,6 +12,8 @@ node_modules/
 .turbo/
 .next/
 dist/
+dist-dev/
+dist-tsc/
 build/
 coverage/
 out/

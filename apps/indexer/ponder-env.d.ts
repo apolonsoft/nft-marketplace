@@ -1,3 +1,3 @@
-declare module 'ponder:registry' {
+declare module '@/generated' {
   export const ponder: any;
 }

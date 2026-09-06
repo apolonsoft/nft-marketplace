@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import prismaClient from '@prisma/client';
+import type { Prisma as PrismaTypes } from '@prisma/client';
 import { PrismaService } from '../identity/prisma.service';
 import type { MarketplaceReadRepository, ReadQuery, ReadResource, ReadRow } from './read.types';
+
+const { Prisma } = prismaClient;
 
 @Injectable()
 export class PostgresMarketplaceReadRepository implements MarketplaceReadRepository {
   constructor(private readonly prisma: PrismaService) {}
   async query(resource: ReadResource, query: ReadQuery): Promise<ReadRow[]> {
-    const conditions: Prisma.Sql[] = [];
+    const conditions: PrismaTypes.Sql[] = [];
     const tables: Record<ReadResource, string> = {
       collections: 'collection',
       nfts: 'token',

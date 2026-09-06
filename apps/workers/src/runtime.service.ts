@@ -14,7 +14,7 @@ import {
   mediaIngestJobSchema,
   type WebhookDeliveryJob,
 } from './queues.js';
-import type { WorkerMetrics } from './metrics.js';
+import { WorkerMetrics } from './metrics.js';
 import { EventStore } from './event-processing.js';
 import { MediaStore, IpfsPinningClient } from './media.js';
 import { Pool } from 'pg';

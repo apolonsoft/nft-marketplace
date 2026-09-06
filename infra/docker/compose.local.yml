@@ -9,7 +9,13 @@ services:
       POSTGRES_PASSWORD: marketplace
     ports: ['5432:5432']
     volumes: [postgres-data:/var/lib/postgresql/data]
-    healthcheck: { test: ['CMD-SHELL', 'pg_isready -U marketplace -d nft_marketplace'], interval: 5s, timeout: 5s, retries: 20 }
+    healthcheck:
+      {
+        test: ['CMD-SHELL', 'pg_isready -U marketplace -d nft_marketplace'],
+        interval: 5s,
+        timeout: 5s,
+        retries: 20,
+      }
   redis:
     image: redis:7-alpine
     ports: ['6379:6379']
@@ -20,82 +26,39 @@ services:
     command: ['daemon', '--migrate=true', '--enable-pubsub-experiment']
     volumes: [kubo-data:/data/ipfs]
     ports: ['5001:5001', '8080:8080']
-    healthcheck: { test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:5001/api/v0/id >/dev/null'], interval: 10s, timeout: 5s, retries: 20 }
+    healthcheck:
+      {
+        test: ['CMD-SHELL', 'wget --post-data="" -qO- http://127.0.0.1:5001/api/v0/id >/dev/null'],
+        interval: 10s,
+        timeout: 5s,
+        retries: 20,
+      }
   anvil:
     image: ghcr.io/foundry-rs/foundry:stable
-    command: ['anvil', '--host', '0.0.0.0', '--chain-id', '31337', '--block-time', '1', '--state', '/root/.foundry/anvil-state.json']
+    entrypoint: []
+    command:
+      [
+        'anvil',
+        '--host',
+        '0.0.0.0',
+        '--chain-id',
+        '31337',
+        '--block-time',
+        '1',
+        '--state',
+        '/root/.foundry/anvil-state.json',
+      ]
     volumes: [anvil-data:/root/.foundry]
     ports: ['8545:8545']
-    healthcheck: { test: ['CMD-SHELL', 'cast block-number --rpc-url http://127.0.0.1:8545 >/dev/null'], interval: 5s, timeout: 5s, retries: 20 }
-  deploy:
-    image: ghcr.io/foundry-rs/foundry:stable
-    working_dir: /workspace/contracts/marketplace
-    volumes:
-      - ../..:/workspace
-      - anvil-deployment:/shared
-    environment:
-      FOUNDRY_PROFILE: anvil
-      BROADCAST: 'true'
-      DEPLOYER_PRIVATE_KEY: ${DEPLOYER_PRIVATE_KEY:-0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce036f1c6f5f4c6a9a9f9b1}
-      PLATFORM_MULTISIG: ${PLATFORM_MULTISIG:-0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266}
-      TREASURY_ADDRESS: ${TREASURY_ADDRESS:-0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266}
-      PLATFORM_FEE_BPS: ${PLATFORM_FEE_BPS:-250}
-      ANVIL_RPC_URL: http://anvil:8545
-    depends_on: { anvil: { condition: service_healthy } }
-    command: ['sh', '-c', 'forge script script/Deploy.s.sol:Deploy --rpc-url http://anvil:8545 --broadcast --slow && cp broadcast/Deploy.s.sol/31337/run-latest.json /shared/run-latest.json']
-  indexer:
-    build: { context: ../.., dockerfile: infra/docker/indexer.Dockerfile }
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgresql://marketplace:marketplace@postgres:5432/nft_marketplace
-      ANVIL_RPC_URL: http://anvil:8545
-      PONDER_NETWORK: anvil
-      PONDER_START_BLOCK: ${PONDER_START_BLOCK:-0}
-    ports: ['42069:42069']
-    volumes: [anvil-deployment:/shared:ro]
-    depends_on: { postgres: { condition: service_healthy }, anvil: { condition: service_healthy }, deploy: { condition: service_completed_successfully } }
-  api:
-    build: { context: ../.., dockerfile: infra/docker/api.Dockerfile }
-    environment:
-      NODE_ENV: development
-      PORT: 3001
-      DATABASE_URL: postgresql://marketplace:marketplace@postgres:5432/nft_marketplace
-      INDEXER_HEALTH_URL: http://indexer:42069/health
-      SIWE_ALLOWED_DOMAINS: localhost:3000
-      SIWE_ALLOWED_CHAIN_IDS: 31337
-      API_DOCS_ENABLED: 'true'
-      PRIVACY_ENCRYPTION_KEY: development-only-key-change-me
-    ports: ['3001:3001']
-    depends_on: { postgres: { condition: service_healthy }, indexer: { condition: service_started } }
-  workers:
-    build: { context: ../.., dockerfile: infra/docker/workers.Dockerfile }
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgresql://marketplace:marketplace@postgres:5432/nft_marketplace
-      REDIS_URL: redis://redis:6379
-      IPFS_PIN_ENDPOINT: http://kubo:5001/api/v0/add
-    ports: ['3020:3020']
-    depends_on: { postgres: { condition: service_healthy }, redis: { condition: service_healthy }, kubo: { condition: service_healthy } }
-  web:
-    build: { context: ../.., dockerfile: infra/docker/web.Dockerfile }
-    environment: { NEXT_PUBLIC_API_BASE_URL: http://localhost:3001 }
-    ports: ['3000:3000']
-    depends_on: { api: { condition: service_started } }
-  gateway:
-    image: traefik:v3.3
-    command: ['--providers.docker=true', '--providers.docker.exposedbydefault=false', '--entrypoints.web.address=:8088']
-    ports: ['8088:8088', '8089:8089']
-    volumes: ['/var/run/docker.sock:/var/run/docker.sock:ro']
-    labels:
-      traefik.enable: 'true'
-      traefik.http.routers.web.rule: Host(`marketplace.localhost`)
-      traefik.http.routers.web.entrypoints: web
-      traefik.http.services.web.loadbalancer.server.port: '3000'
-    depends_on: [web, api]
-
+    healthcheck:
+      {
+        test: ['CMD-SHELL', 'cast block-number --rpc-url http://127.0.0.1:8545 >/dev/null'],
+        interval: 5s,
+        timeout: 5s,
+        retries: 20,
+      }
 volumes:
   postgres-data:
   redis-data:
   kubo-data:
   anvil-data:
-  anvil-deployment:

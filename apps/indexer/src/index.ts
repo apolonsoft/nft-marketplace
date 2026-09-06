@@ -1,4 +1,4 @@
-import { ponder } from 'ponder:registry';
+import { ponder } from '@/generated';
 import { balanceId, eventId } from '@nft-marketplace/database';
 import { createDomainEventSchema, type DomainEventType } from '@nft-marketplace/domain';
 

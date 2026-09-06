@@ -2,7 +2,7 @@
 
 ## Start and reset
 
-Run `yarn local:up` from the repository root to build and start PostgreSQL, Redis, Kubo, Anvil, contract deployment, indexer, API, workers, web, and Traefik. Run `yarn local:migrate` to apply Prisma migrations and `yarn local:seed` to load deterministic local application data. `yarn local:down` stops services while preserving volumes. `yarn local:reset` removes the named local volumes, recreates the stack, migrates the database, and seeds the baseline records.
+Run `yarn local:up` from the repository root to start the local infrastructure services: PostgreSQL, Redis, Kubo, and Anvil. `yarn local:down` stops these services while preserving volumes, and `yarn local:logs` follows their logs.
 
 ## Services
 
