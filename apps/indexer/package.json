@@ -17,7 +17,7 @@
     "dev": "ponder dev",
     "start": "ponder start",
     "build": "ponder codegen && ../../node_modules/.bin/tsc -p tsconfig.json --noEmit",
-    "test": "../../node_modules/.bin/vitest run",
+    "test": "../../node_modules/.bin/vitest run tests",
     "lint": "../../node_modules/.bin/eslint . --max-warnings=0",
     "lint:fix": "../../node_modules/.bin/eslint . --fix",
     "typecheck": "../../node_modules/.bin/tsc -p tsconfig.json --noEmit",
